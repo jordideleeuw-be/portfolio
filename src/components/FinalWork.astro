@@ -1,0 +1,47 @@
+---
+import SplitLayout from './SplitLayout.jsx';
+---
+
+<section class="screen final-work">
+  <SplitLayout 
+    client:load
+    title="JIDLI — Hybrid Album"
+    description="An exploratory project merging physical K-pop packaging with digital interfaces. The showcase includes a custom interactive iPad application, an NFC card scanner slot, and a printed editorial magazine."
+    tools={["InDesign", "Illustrator", "React", "After Effects"]}
+  >
+    {/* ALLES WAT JE HIER TUSSEN ZET, KOMT AUTOMATISCH IN DE 9-KOLOMMEN LINKERKANT! */}
+    <div slot="leftContent" class="my-visuals">
+      <img
+        src="/images/JIDLI_INCLUSIONS.jpg"
+        alt="JIDLI — Hybrid Album showcase"
+        class="showcase-image"
+      />
+    </div>
+  </SplitLayout>
+</section>
+
+<style>
+  .screen {
+    width: 100%;
+    height: 100vh;
+    background-color: #feb6f6;
+  }
+
+  .my-visuals {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .showcase-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+</style>

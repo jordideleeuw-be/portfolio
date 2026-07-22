@@ -1,11 +1,45 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Hero from '../components/Hero.astro';
+import FinalWork from '../components/FinalWork.astro';
+import Internship from '../components/Internship.astro';
+import Magazine from '../components/Magazine.astro';
+import CvSummary from '../components/CvSummary.astro';
 ---
 
 <Layout>
-	<Welcome />
+  <main>
+    <Hero />
+    <FinalWork />
+    <Internship />
+    <Magazine />
+    <CvSummary />
+  </main>
+
+  <footer class="footer">
+    <p>© 2026 Jordi — Portfolio Footer</p>
+  </footer>
 </Layout>
+
+<style>
+  main {
+    width: 100%;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    overflow-x: hidden;
+  }
+
+  .footer {
+    /* HIER IS DE WIDTH: 100% WEGGEHAALD EN BORDER-BOX TOEGEVOEGD! */
+    box-sizing: border-box;
+    padding: 3rem 2rem;
+    background-color: #0a0a0a;
+    color: #666666;
+    text-align: center;
+    font-family: system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+  }
+</style>

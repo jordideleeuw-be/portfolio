@@ -1,23 +1,360 @@
+---
+---
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio</title>
+  </head>
+  <body>
+    <!-- DE GRID OVERLAY -->
+    <div class="grid-overlay">
+      <div class="col"></div><div class="col"></div><div class="col"></div><div class="col"></div>
+      <div class="col"></div><div class="col"></div><div class="col"></div><div class="col"></div>
+      <div class="col"></div><div class="col"></div><div class="col"></div><div class="col"></div>
+    </div>
+
+    <!-- HIER KOMT AL JOUW PAGINA CONTENT IN -->
+    <slot />
+  </body>
 </html>
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
+<style is:global>
+  /* =========================================================
+     ✍️ 1. CUSTOM FONTS INLADEN (GIBSON SUPER-FAMILY & EMBER CROWN)
+     ========================================================= */
+
+  @font-face {
+    font-family: 'EmberCrown';
+    src: url('/fonts/EmberCrown.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-thin.otf') format('opentype');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-thinitalic.otf') format('opentype');
+    font-weight: 100;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-light.otf') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-lightitalic.otf') format('opentype');
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-regular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-book.otf') format('opentype');
+    font-weight: 450;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-bookitalic.otf') format('opentype');
+    font-weight: 450;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-italic.otf') format('opentype');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-medium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-mediumitalic.otf') format('opentype');
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-semibold.otf') format('opentype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-semibolditalic.otf') format('opentype');
+    font-weight: 600;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-bold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-bolditalic.otf') format('opentype');
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-heavy.otf') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Gibson';
+    src: url('/fonts/Fontspring-DEMO-gibson-heavyitalic.otf') format('opentype');
+    font-weight: 900;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  /* =========================================================
+     🛠️ 2. JOUW VARIABELE CONTROLS (GRID & FONTS)
+     ========================================================= */
+  :root {
+    --font-base: 'Gibson', system-ui, -apple-system, sans-serif;
+    --font-serif: 'EmberCrown', 'Times New Roman', serif;
+
+    --grid-cols: 12;
+    --grid-gutter: 1vw;
+    --grid-margin: 1vw;
+    --grid-color: rgba(0, 0, 0, 0.2);
+    --grid-status: grid;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-base);
+  }
+
+  /* =========================================================
+     🔥 THE FIX: TRUE FULL-BLEED GRID (NO 1600PX LOCK)
+     ---------------------------------------------------------
+     Removing max-width + margin:0 auto is the entire fix.
+     Without a cap, this container's inline-size == 100vw at
+     every viewport width, which means every `cqi` value used
+     in Hero.astro keeps scaling linearly forever instead of
+     freezing once you cross 1600px. Because .hero-grid uses
+     the exact same --grid-gutter / --grid-margin variables,
+     the two grids stay mathematically identical at all sizes.
+     ========================================================= */
+  .grid-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 9999;
+    pointer-events: none;
+    display: var(--grid-status);
+    grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    padding: 0 var(--grid-margin);
+    box-sizing: border-box;
+  }
+
+  .grid-overlay .col {
+    width: 100%;
+    height: 100%;
+    background-color: var(--grid-color);
+  }
+
+  /* =========================================================
+     ⚡ 4. 9/3 SPLIT LAYOUT SYSTEEM — FROM SCRATCH, ANIMATIE-VEILIG
+     ---------------------------------------------------------
+     Kern van de herbouw: .left-pane en .right-pane VERANDEREN
+     NOOIT MEER van grid-column — die blijven permanent vast op
+     kolom 1-9 en 10-12. In plaats daarvan verandert alleen de
+     KOLOMBREEDTE zelf op de wrapper (grid-template-columns),
+     door kolom 10-12 naar 0fr te laten krimpen bij het sluiten.
+     grid-template-columns IS een property die moderne browsers
+     vloeiend kunnen interpoleren zolang het aantal tracks gelijk
+     blijft (hier steeds 12) — vandaar dat dit wél soepel animeert,
+     in tegenstelling tot het wisselen van grid-column zelf.
+     ========================================================= */
+  .split-layout-wrapper {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols), 1fr);
+    transition: grid-template-columns 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    column-gap: var(--grid-gutter);
+    padding: 0 var(--grid-margin);
+    width: 100%;
+    height: 100vh;
+    box-sizing: border-box;
+    overflow: hidden;
+    position: relative;
+    font-family: var(--font-base);
+  }
+
+  /* Info dicht: kolom 10-12 krijgen 0fr (0 breedte), kolom 1-9
+     nemen automatisch de vrijgekomen ruimte over — vloeiend. */
+  .split-layout-wrapper.info-closed {
+    grid-template-columns: repeat(9, 1fr) repeat(3, 0fr);
+  }
+
+  /* Permanente zwarte marge-strook aan de rechterkant, ALTIJD
+     zichtbaar ongeacht open/dicht — losstaand van de grid-items
+     zelf, dus onafhankelijk van de animatie. */
+  .split-layout-wrapper::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: var(--grid-margin);
+    height: 100%;
+    background-color: #1a1a1a;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .left-pane {
+    grid-column: 1 / span 9;
+    height: 100%;
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .right-pane {
+    grid-column: 10 / span 3;
+    height: 100%;
+    min-width: 0;
+    background-color: #1a1a1a;
+    color: #ffffff;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    container-type: inline-size;
+    overflow: hidden;
+  }
+
+  .toggle-btn {
+    /* Vast op dezelfde plek t.o.v. .split-layout-wrapper: exact
+       op de rechterrand van kolom 12 (right:0 t.o.v. de padding-
+       box van de wrapper, dus binnen de 12 kolommen, tegen de
+       grens met de vaste zwarte marge-strook hierboven). Blijft
+       hier staan ongeacht open/dicht, geen afhankelijkheid meer
+       van right-pane's eigen (nu grid-track-gestuurde) breedte. */
+    position: absolute;
+    top: 6vh;
+    right: 0;
+    z-index: 100;
+    background-color: #000000;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.8vh 1vw;
+    font-family: var(--font-base);
+    font-size: 1vw;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .toggle-btn:hover { background-color: #ff4b4b; }
+
+  .pane-content {
+    padding: 6vh 3vw;
+    display: flex;
+    flex-direction: column;
+    gap: 4vh;
+    width: 100%;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+
+  .right-pane.closed .pane-content { opacity: 0; pointer-events: none; }
+
+  .info-block h3 {
+    font-family: var(--font-base);
+    font-size: 3.5cqi;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #888888;
+    margin-bottom: 1vh;
+  }
+
+  .info-block h2 {
+    font-family: var(--font-base);
+    font-size: 8cqi;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .info-block p {
+    font-family: var(--font-base);
+    font-size: 4.5cqi;
+    line-height: 1.6;
+    color: #cccccc;
+    text-transform: none;
+    font-weight: 400;
+  }
+
+  .tools-list { display: flex; flex-wrap: wrap; gap: 0.8vw; }
+
+  .tool-badge {
+    font-family: var(--font-base);
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 0.6vh 1vw;
+    font-size: 3.5cqi;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+  }
 </style>
