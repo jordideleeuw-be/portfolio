@@ -1,5 +1,7 @@
 ---
 // Hero.astro — Above The Fold (TRUE FULL-BLEED CQI GRID LOCK)
+import { Image } from 'astro:assets';
+import headshot from '../assets/images/headshot.png';
 ---
 
 <section class="screen hero-section">
@@ -36,7 +38,16 @@
 
     <!-- 4. FOTO RECHTS (Kolom 8 tot 13 = 5 kolommen) -->
     <div class="hero-photo-container">
-      <img src="/images/headshot.png" alt="Jordi De Leeuw" class="hero-photo" />
+      <Image
+        src={headshot}
+        alt="Jordi De Leeuw"
+        class="hero-photo"
+        widths={[400, 800, 1200, 1600]}
+        sizes="(max-width: 768px) 100vw, 50vw"
+        format="webp"
+        quality="high"
+        loading="eager"
+      />
     </div>
 
     <!-- 5. DESIGN PORTFOLIO ONDERAAN (6 kolommen breed) -->

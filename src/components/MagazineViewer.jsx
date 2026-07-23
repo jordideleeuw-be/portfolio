@@ -1,17 +1,6 @@
 import React, { useState } from "react";
 
-export default function MagazineViewer() {
-	// Hier zet je jouw spreads.
-	// Tip: Bij een echt magazine is je cover vaak 1 enkele staande foto,
-	// en zijn je spreads (pag 2+3, 4+5) brede liggende foto's!
-	const spreads = [
-		{ id: 1, image: "/images/page1.jpg", caption: "Cover" },
-		{ id: 2, image: "/images/page2-3.jpg", caption: "Spread 01 — Index & Editorial" },
-		{ id: 3, image: "/images/page4-5.jpg", caption: "Spread 02 — Visual Essay" },
-		{ id: 4, image: "/images/page6-7.jpg", caption: "Spread 03 — Typography" },
-		{ id: 5, image: "/images/page8.jpg", caption: "Backcover" },
-	];
-
+export default function MagazineViewer({ spreads }) {
 	// Dit houdt bij op welke spread we nu zitten (begint bij 0, dus de cover)
 	const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -33,7 +22,12 @@ export default function MagazineViewer() {
 		<div className="magazine-container">
 			{/* HET BEELD */}
 			<div className="spread-frame">
-				<img src={spreads[currentIndex].image} alt={spreads[currentIndex].caption} className="spread-image" />
+				<img
+					src={spreads[currentIndex].image}
+					alt={spreads[currentIndex].caption}
+					className="spread-image"
+					loading={currentIndex === 0 ? "eager" : "lazy"}
+				/>
 			</div>
 
 			{/* DE NAVIGATIE & CAPTION */}

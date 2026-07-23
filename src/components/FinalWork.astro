@@ -1,5 +1,7 @@
 ---
+import { Image } from 'astro:assets';
 import SplitLayout from './SplitLayout.jsx';
+import jidliInclusions from '../assets/images/JIDLI_INCLUSIONS.jpg';
 ---
 
 <section class="screen final-work">
@@ -7,14 +9,17 @@ import SplitLayout from './SplitLayout.jsx';
     client:load
     title="JIDLI — Hybrid Album"
     description="An exploratory project merging physical K-pop packaging with digital interfaces. The showcase includes a custom interactive iPad application, an NFC card scanner slot, and a printed editorial magazine."
-    tools={["InDesign", "Illustrator", "React", "After Effects"]}
+    tools={["InDesign", "Illustrator", "Photoshop", "Lightroom", "After Effects", "Premiere Pro", "Figma", "Maya", "Google AI", "Suno", "Swift"]}
   >
     {/* ALLES WAT JE HIER TUSSEN ZET, KOMT AUTOMATISCH IN DE 9-KOLOMMEN LINKERKANT! */}
     <div slot="leftContent" class="my-visuals">
-      <img
-        src="/images/JIDLI_INCLUSIONS.jpg"
+      <Image
+        src={jidliInclusions}
         alt="JIDLI — Hybrid Album showcase"
         class="showcase-image"
+        widths={[400, 800, 1200, 1600, 2000]}
+        sizes="(max-width: 900px) 100vw, 75vw"
+        format="webp"
       />
     </div>
   </SplitLayout>
@@ -23,16 +28,12 @@ import SplitLayout from './SplitLayout.jsx';
 <style>
   .screen {
     width: 100%;
-    height: 100vh;
-    background-color: #feb6f6;
+    min-height: 100vh;
+    background-color: #6eff00;
   }
 
   .my-visuals {
     width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -40,8 +41,7 @@ import SplitLayout from './SplitLayout.jsx';
 
   .showcase-image {
     width: 100%;
-    height: 100%;
-    object-fit: contain;
+    height: auto;
     display: block;
   }
 </style>

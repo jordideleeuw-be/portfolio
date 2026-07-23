@@ -1,11 +1,35 @@
 ---
+import { getImage } from 'astro:assets';
 import MagazineViewer from './MagazineViewer.jsx';
+
+import page1 from '../assets/images/page1.jpg';
+import page23 from '../assets/images/page2-3.jpg';
+import page45 from '../assets/images/page4-5.jpg';
+import page67 from '../assets/images/page6-7.jpg';
+import page8 from '../assets/images/page8.jpg';
+
+const rawSpreads = [
+  { id: 1, src: page1, caption: 'Cover' },
+  { id: 2, src: page23, caption: 'Spread 01 — Index & Editorial' },
+  { id: 3, src: page45, caption: 'Spread 02 — Visual Essay' },
+  { id: 4, src: page67, caption: 'Spread 03 — Typography' },
+  { id: 5, src: page8, caption: 'Backcover' },
+];
+
+// astro:assets only works inside .astro templates, so the spreads are
+// optimized here and handed to the React viewer as plain URLs.
+const spreads = await Promise.all(
+  rawSpreads.map(async ({ id, src, caption }) => {
+    const optimized = await getImage({ src, format: 'webp', width: 1600 });
+    return { id, image: optimized.src, caption };
+  })
+);
 ---
 
 <section class="screen magazine">
   <div class="content-wrapper">
     <!-- De Viewer laadt hier live in -->
-    <MagazineViewer client:load />
+    <MagazineViewer client:load spreads={spreads} />
   </div>
 </section>
 

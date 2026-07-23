@@ -234,9 +234,8 @@
     column-gap: var(--grid-gutter);
     padding: 0 var(--grid-margin);
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
     box-sizing: border-box;
-    overflow: hidden;
     position: relative;
     font-family: var(--font-base);
   }
@@ -264,9 +263,12 @@
 
   .left-pane {
     grid-column: 1 / span 9;
-    height: 100%;
     min-width: 0;
-    overflow: hidden;
+    /* Altijd dezelfde top/bottom padding als de rest van het grid,
+       ongeacht wat hier binnenin staat (1 foto, of straks een grid
+       van meerdere afbeeldingen). Kolombreedte blijft hierdoor
+       exact 9 kolommen — nooit vervormd om in 100vh te passen. */
+    padding: var(--grid-margin) 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -274,7 +276,6 @@
 
   .right-pane {
     grid-column: 10 / span 3;
-    height: 100%;
     min-width: 0;
     background-color: #1a1a1a;
     color: #ffffff;
@@ -282,33 +283,45 @@
     display: flex;
     flex-direction: column;
     container-type: inline-size;
-    overflow: hidden;
   }
 
   .toggle-btn {
-    /* Vast op dezelfde plek t.o.v. .split-layout-wrapper: exact
-       op de rechterrand van kolom 12 (right:0 t.o.v. de padding-
-       box van de wrapper, dus binnen de 12 kolommen, tegen de
-       grens met de vaste zwarte marge-strook hierboven). Blijft
-       hier staan ongeacht open/dicht, geen afhankelijkheid meer
-       van right-pane's eigen (nu grid-track-gestuurde) breedte. */
+    /* Vast op dezelfde plek t.o.v. .split-layout-wrapper. Geen
+       achtergrond, geen border, geen hover, geen tekst — alleen
+       het pijltje. Open: los tegen de rand van kolom 12, groter.
+       Dicht: even breed als de vaste marge-strook en daarbinnen
+       gecentreerd, kleiner. Geen transities — instant wisselen. */
     position: absolute;
     top: 6vh;
     right: 0;
     z-index: 100;
-    background-color: #000000;
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 0.8vh 1vw;
-    font-family: var(--font-base);
-    font-size: 1vw;
-    font-weight: 800;
-    text-transform: uppercase;
+    background: none;
+    border: none;
+    padding: 0;
     cursor: pointer;
-    transition: background 0.2s ease;
   }
 
-  .toggle-btn:hover { background-color: #ff4b4b; }
+  .split-layout-wrapper.info-closed .toggle-btn {
+    width: var(--grid-margin);
+    display: flex;
+    justify-content: center;
+  }
+
+  .arrow-icon {
+    display: block;
+    width: 3.2vw;
+    min-width: 44px;
+    height: auto;
+  }
+
+  .arrow-flipped {
+    transform: rotate(180deg);
+  }
+
+  .split-layout-wrapper.info-closed .arrow-icon {
+    width: 2vw;
+    min-width: 28px;
+  }
 
   .pane-content {
     padding: 6vh 3vw;
@@ -316,6 +329,7 @@
     flex-direction: column;
     gap: 4vh;
     width: 100%;
+    height: 100%;
     opacity: 1;
     transition: opacity 0.3s ease;
   }
@@ -324,6 +338,7 @@
 
   .info-block h3 {
     font-family: var(--font-base);
+    font-weight: 400;
     font-size: 3.5cqi;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -333,6 +348,7 @@
 
   .info-block h2 {
     font-family: var(--font-base);
+    font-weight: 400;
     font-size: 8cqi;
     line-height: 1.2;
     text-transform: uppercase;
@@ -347,14 +363,42 @@
     font-weight: 400;
   }
 
-  .tools-list { display: flex; flex-wrap: wrap; gap: 0.8vw; }
+  .tools-list { display: flex; flex-wrap: wrap; gap: 0.8vw; align-items: center; }
 
-  .tool-badge {
+  /* Jouw SVG's staan al op hetzelfde vierkante artboard — gewoon
+     direct tonen, geen wrapper, geen achtergrond, geen padding. */
+  .tool-icon {
+    width: 5.5cqi;
+    height: 5.5cqi;
+    min-width: 44px;
+    min-height: 44px;
+    display: block;
+  }
+
+  /* Onderaan-blok: "bezoek de site" — wordt met margin-top:auto
+     naar de onderkant van de info-lade geduwd, net als in het
+     referentie-ontwerp. Rendert alleen als liveUrl is meegegeven. */
+  .visit-block {
+    margin-top: auto;
+  }
+
+  .visit-button {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background-color: #ffffff;
+    color: #000000;
     font-family: var(--font-base);
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 0.6vh 1vw;
+    font-weight: 800;
     font-size: 3.5cqi;
-    border-radius: 2px;
+    text-transform: uppercase;
     letter-spacing: 0.05em;
+    text-decoration: none;
+    padding: 1.4vh 0;
+    transition: background-color 0.2s ease;
+  }
+
+  .visit-button:hover {
+    background-color: #dddddd;
   }
 </style>
