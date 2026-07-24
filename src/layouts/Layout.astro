@@ -162,7 +162,7 @@
     --grid-cols: 12;
     --grid-gutter: 1vw;
     --grid-margin: 1vw;
-    --grid-color: rgba(0, 0, 0, 0.2);
+    --grid-color: rgba(0, 0, 0, 0.0);
     --grid-status: grid;
   }
 
@@ -256,7 +256,7 @@
     right: 0;
     width: var(--grid-margin);
     height: 100%;
-    background-color: #1a1a1a;
+    background-color: #ffffff;
     z-index: 5;
     pointer-events: none;
   }
@@ -277,9 +277,9 @@
   .right-pane {
     grid-column: 10 / span 3;
     min-width: 0;
-    background-color: #1a1a1a;
-    color: #ffffff;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    /* background-color: #20fa0328; */
+    color: #000000;
+    /* border-left: 0.1cqi solid rgba(0, 0, 0, 1); */
     display: flex;
     flex-direction: column;
     container-type: inline-size;
@@ -312,6 +312,9 @@
     width: 3.2vw;
     min-width: 44px;
     height: auto;
+    /* arrow.svg has a hardcoded white fill (built for the old dark panel);
+       brightness(0) forces it black to show up against the white panel. */
+    filter: brightness(0);
   }
 
   .arrow-flipped {
@@ -324,7 +327,7 @@
   }
 
   .pane-content {
-    padding: 6vh 3vw;
+    padding: 6vh var(--grid-gutter);
     display: flex;
     flex-direction: column;
     gap: 4vh;
@@ -342,7 +345,7 @@
     font-size: 3.5cqi;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: #888888;
+    color: #555555;
     margin-bottom: 1vh;
   }
 
@@ -358,7 +361,7 @@
     font-family: var(--font-base);
     font-size: 4.5cqi;
     line-height: 1.6;
-    color: #cccccc;
+    color: #333333;
     text-transform: none;
     font-weight: 400;
   }
@@ -373,6 +376,9 @@
     min-width: 44px;
     min-height: 44px;
     display: block;
+    /* Tool SVGs have a hardcoded white fill (built for the old dark panel);
+       brightness(0) forces them black to show up against the white panel. */
+    filter: brightness(0);
   }
 
   /* Onderaan-blok: "bezoek de site" — wordt met margin-top:auto
@@ -386,8 +392,8 @@
     display: block;
     width: 100%;
     text-align: center;
-    background-color: #ffffff;
-    color: #000000;
+    background-color: #000000;
+    color: #ffffff;
     font-family: var(--font-base);
     font-weight: 800;
     font-size: 3.5cqi;
@@ -399,6 +405,6 @@
   }
 
   .visit-button:hover {
-    background-color: #dddddd;
+    background-color: #333333;
   }
 </style>

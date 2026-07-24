@@ -6,14 +6,38 @@ import FinalWork from '../components/FinalWork.astro';
 import Internship from '../components/Internship.astro';
 import Magazine from '../components/Magazine.astro';
 import CvSummary from '../components/CvSummary.astro';
+import Spacer from '../components/Spacer.astro';
+
+// Toggle to preview one detail SVG (rotated per spot) instead of the four
+// distinct ones. Both configs stay here — flip the boolean, nothing else.
+const USE_SINGLE_DETAIL_PREVIEW = false;
+
+const spacerConfigs = USE_SINGLE_DETAIL_PREVIEW
+  ? [
+      { detail: 1, yOffset: -8, rotate: 180 },
+      { detail: 1, yOffset: -4, rotate: 90 },
+      { detail: 1, yOffset: -8, rotate: -20 },
+      { detail: 1, yOffset: 4, rotate: 45 },
+    ]
+  : [
+      { detail: 1, yOffset: -8, rotate: 0 },
+      { detail: 2, yOffset: -8, rotate: 0 },
+      { detail: 3, yOffset: -8, rotate: 0 },
+      { detail: 4, yOffset: 1, rotate: 0 },
+    ];
 ---
 
 <Layout>
   <main>
+    {/* yOffset is in vh — negative moves the detail art up, positive moves it down. */}
     <Hero />
+    <Spacer {...spacerConfigs[0]} />
     <FinalWork />
+    <Spacer {...spacerConfigs[1]} />
     <Internship />
+    <Spacer {...spacerConfigs[2]} />
     <Magazine />
+    <Spacer {...spacerConfigs[3]} />
     <CvSummary />
   </main>
 
@@ -35,9 +59,11 @@ import CvSummary from '../components/CvSummary.astro';
   .footer {
     /* HIER IS DE WIDTH: 100% WEGGEHAALD EN BORDER-BOX TOEGEVOEGD! */
     box-sizing: border-box;
-    padding: 3rem 2rem;
-    background-color: #0a0a0a;
+    padding: 1cqi 2rem;
+    //background-color: #fff;
+    background-color: #000;
     color: #666666;
+    //border-top: 0.2cqi solid #000000;
     text-align: center;
     font-family: system-ui, -apple-system, sans-serif;
     overflow-x: hidden;

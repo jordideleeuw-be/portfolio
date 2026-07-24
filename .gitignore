@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# raw/uncompressed video sources — kept locally, never shipped or committed
+video-sources/

@@ -1,21 +1,80 @@
 ---
 // Internship.astro
+import SplitLayout from './SplitLayout.jsx';
 ---
 <section class="screen internship">
-  <h1>Internship</h1>
+  <SplitLayout
+    client:load
+    title="Internship"
+    description="Placeholder description — add details about the internship project here."
+    tools={[]}
+  >
+    <div slot="leftContent" class="left-content">
+      {/* 12 tiles, 3 columns x 4 rows, all 4:3 — same style as FinalWork's
+          placeholder row. Stacking 4 rows is what gives the block its
+          height, matching FinalWork's tall showcase image overall. */}
+      <div class="tile-grid">
+        {Array.from({ length: 12 }).map(() => (
+          <div class="tile"><span class="tile-label">Add image</span></div>
+        ))}
+      </div>
+    </div>
+  </SplitLayout>
 </section>
 
 <style>
   .screen {
     width: 100%;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 3rem;
+    min-height: 100vh;
+    background-color: #fff;
   }
-  .internship {
-    background-color: #2be080;
-    color: #000000;
+
+  .left-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .tile-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  /* 4:3 via the padding-top percentage hack (not the `aspect-ratio`
+     property, same as FinalWork's placeholder tiles) — this sits inside
+     SplitLayout's animated info-panel grid, which aspect-ratio doesn't
+     reliably survive. Four stacked rows give the block its height,
+     matching FinalWork's tall showcase image overall. */
+  .tile {
+    width: 100%;
+    height: 0;
+    padding-top: 75%;
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.15);
+    /* outline instead of border — border would add to the box-sizing
+       calculation and throw off the ratio from the padding-top hack. */
+    outline: 2px dashed rgba(0, 0, 0, 0.4);
+    outline-offset: -2px;
+  }
+
+  .tile-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(0, 0, 0, 0.55);
   }
 </style>

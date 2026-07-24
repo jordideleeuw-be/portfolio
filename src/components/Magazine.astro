@@ -1,114 +1,152 @@
 ---
 import { getImage } from 'astro:assets';
 import MagazineViewer from './MagazineViewer.jsx';
+import SplitLayout from './SplitLayout.jsx';
 
-import page1 from '../assets/images/page1.jpg';
-import page23 from '../assets/images/page2-3.jpg';
-import page45 from '../assets/images/page4-5.jpg';
-import page67 from '../assets/images/page6-7.jpg';
-import page8 from '../assets/images/page8.jpg';
+import magazineCover from '../assets/images/magazine-cover.png';
+import magazineSpread1 from '../assets/images/magazine-spread1.png';
+import magazineSpread2 from '../assets/images/magazine-spread2.png';
+import magazineSpread3 from '../assets/images/magazine-spread3.png';
+import magazineBackcover from '../assets/images/magazine-backcover.png';
 
 const rawSpreads = [
-  { id: 1, src: page1, caption: 'Cover' },
-  { id: 2, src: page23, caption: 'Spread 01 — Index & Editorial' },
-  { id: 3, src: page45, caption: 'Spread 02 — Visual Essay' },
-  { id: 4, src: page67, caption: 'Spread 03 — Typography' },
-  { id: 5, src: page8, caption: 'Backcover' },
+  { id: 1, src: magazineCover, caption: 'Cover' },
+  { id: 2, src: magazineSpread1, caption: 'Spread 01 — Index & Editorial' },
+  { id: 3, src: magazineSpread2, caption: 'Spread 02 — Visual Essay' },
+  { id: 4, src: magazineSpread3, caption: 'Spread 03 — Typography' },
+  { id: 5, src: magazineBackcover, caption: 'Backcover' },
 ];
 
-// astro:assets only works inside .astro templates, so the spreads are
-// optimized here and handed to the React viewer as plain URLs.
+// The viewer sits in the 9-column left-pane (up to ~75vw), which can get
+// wide on large/retina screens — the sources have plenty of native
+// resolution to cover that. astro:assets only works inside .astro
+// templates, so the spreads are optimized here and handed to the React
+// viewer as a src + manually-built srcset.
+const spreadWidths = [800, 1200, 1600, 2000, 2400, 3200];
+
 const spreads = await Promise.all(
   rawSpreads.map(async ({ id, src, caption }) => {
-    const optimized = await getImage({ src, format: 'webp', width: 1600 });
-    return { id, image: optimized.src, caption };
+    const variants = await Promise.all(
+      spreadWidths.map((width) => getImage({ src, width, format: 'webp' }))
+    );
+    const srcSet = variants.map((v) => `${v.src} ${v.attributes.width}w`).join(', ');
+    const { width, height } = variants.at(-1).attributes;
+    const orientation = width >= height ? 'landscape' : 'portrait';
+    return { id, image: variants.at(-1).src, srcSet, caption, orientation, aspectRatio: width / height };
   })
 );
+
+// Every page shares this one frame ratio (taken from the landscape spreads)
+// so the viewer never changes height when you navigate between the portrait
+// cover/backcover and the wider spreads — cover/backcover render centered
+// and letterboxed inside the same-height frame instead of using their own
+// (much taller) aspect ratio. Expressed as a padding-top percentage (the
+// classic aspect-ratio hack) rather than the `aspect-ratio` property — see
+// the comment on .spread-frame for why.
+const frameAspectRatio = spreads.find((s) => s.orientation === 'landscape').aspectRatio;
+const framePaddingTopPercent = (1 / frameAspectRatio) * 100;
 ---
 
 <section class="screen magazine">
-  <div class="content-wrapper">
-    <!-- De Viewer laadt hier live in -->
-    <MagazineViewer client:load spreads={spreads} />
-  </div>
+  <SplitLayout
+    client:load
+    title="JIDLI — Editorial Magazine"
+    description="A printed companion piece for the JIDLI hybrid album — an editorial magazine spread covering the visual essay, typography direction, and behind-the-scenes process."
+    tools={["InDesign", "Photoshop", "Lightroom"]}
+  >
+    <div slot="leftContent" class="content-wrapper">
+      <!-- De Viewer laadt hier live in -->
+      <MagazineViewer client:load spreads={spreads} framePaddingTopPercent={framePaddingTopPercent} />
+    </div>
+  </SplitLayout>
 </section>
 
 <style is:global>
   /* GLOBAL STYLES VOOR DE REACT VIEWER (Omdat het in React zit, werkt is:global hier het best) */
   .magazine-container {
     width: 100%;
-    max-width: 1200px; /* Bepaalt hoe breed je spread maximaal mag worden op grote schermen */
-    margin: 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
   }
 
+  /* Ratio comes from an inline padding-top percentage (paddingTopPercent,
+     matched to the landscape spreads) instead of the `aspect-ratio`
+     property — the classic padding-hack technique, since `aspect-ratio`
+     doesn't reliably recompute in every browser when this box's width
+     changes via the info-panel's CSS Grid transition. Every page — portrait
+     or landscape — sizes to the exact same frame height at a given column
+     width; landscape spreads fill it edge-to-edge, portrait cover/backcover
+     render centered and letterboxed inside it via object-fit on the image. */
   .spread-frame {
     width: 100%;
-    height: 70vh; /* Pakt maximaal 70% van de schermhoogte zodat je knoppen altijd in beeld blijven */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.03); /* Heel subtiel achtergrondje voor als een foto laadt */
+    height: 0;
+    position: relative;
+    background-color: #ffffff;
+  }
+
+  /* Cover/backcover stay off white on purpose — fully transparent so the
+     screen's own background shows through with no grey tint, letterboxed
+     around them instead of the white used for the spreads (which fill the
+     frame edge-to-edge anyway). */
+  .spread-frame--portrait {
+    background-color: transparent;
   }
 
   .spread-image {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     object-fit: contain; /* CRUCIAAL: Zorgt dat je foto ALTIJD in zijn originele verhouding past! */
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); /* Subtiele, dure studio-schaduw */
+    display: block;
+    /* filter (not box-shadow) so the shadow hugs the visible, letterboxed
+       image content instead of the full (invisible) frame rectangle. */
+    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15));
     transition: opacity 0.3s ease-in-out;
   }
 
-  /* Knoppen en tekst styling */
+  /* Knoppen styling */
   .magazine-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
     max-width: 600px;
-    font-family: system-ui, -apple-system, sans-serif;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
   }
 
   .nav-btn {
     background: none;
-    border: 2px solid #000000;
-    color: #000000;
-    padding: 0.6rem 1.2rem;
-    font-family: inherit;
-    font-weight: 800;
-    font-size: 0.8rem;
-    text-transform: uppercase;
+    border: none;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: opacity 0.2s ease;
   }
 
   .nav-btn:hover:not(:disabled) {
-    background-color: #000000;
-    color: #ffffff;
+    opacity: 0.6;
   }
 
   .nav-btn:disabled {
-    border-color: rgba(0, 0, 0, 0.2);
-    color: rgba(0, 0, 0, 0.2);
+    opacity: 0.25;
     cursor: not-allowed;
   }
 
-  .spread-counter {
-    color: #000000;
+  .nav-arrow-icon {
+    width: 2rem;
+    height: auto;
+    display: block;
+    /* arrow.svg is baked white for use on SplitLayout's dark info panel —
+       brightness(0) forces it black here without touching that file. */
+    filter: brightness(0);
   }
-  
-  .caption-text {
-    font-weight: 400;
-    opacity: 0.7;
+
+  .nav-btn--prev .nav-arrow-icon {
+    transform: rotate(180deg);
   }
 </style>
 
@@ -116,17 +154,12 @@ const spreads = await Promise.all(
   /* De basis sectie */
   .screen {
     width: 100%;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #ff9f43; /* Je achtergrondkleur */
-    padding: 2rem;
+    min-height: 100vh;
+    background-color: #fff; /* Je achtergrondkleur */
   }
 
   .content-wrapper {
     width: 100%;
-    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;

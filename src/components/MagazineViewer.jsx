@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function MagazineViewer({ spreads }) {
+export default function MagazineViewer({ spreads, framePaddingTopPercent }) {
 	// Dit houdt bij op welke spread we nu zitten (begint bij 0, dus de cover)
 	const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -21,28 +21,28 @@ export default function MagazineViewer({ spreads }) {
 	return (
 		<div className="magazine-container">
 			{/* HET BEELD */}
-			<div className="spread-frame">
+			<div
+				className={`spread-frame spread-frame--${spreads[currentIndex].orientation}`}
+				style={{ paddingTop: `${framePaddingTopPercent}%` }}
+			>
 				<img
 					src={spreads[currentIndex].image}
+					srcSet={spreads[currentIndex].srcSet}
+					sizes="(max-width: 900px) 100vw, 75vw"
 					alt={spreads[currentIndex].caption}
 					className="spread-image"
 					loading={currentIndex === 0 ? "eager" : "lazy"}
 				/>
 			</div>
 
-			{/* DE NAVIGATIE & CAPTION */}
+			{/* DE NAVIGATIE */}
 			<div className="magazine-nav">
-				<button onClick={prevSpread} disabled={currentIndex === 0} className="nav-btn">
-					&larr; Prev
+				<button onClick={prevSpread} disabled={currentIndex === 0} className="nav-btn nav-btn--prev" aria-label="Previous page">
+					<img src="/icons/arrow.svg" alt="" className="nav-arrow-icon" />
 				</button>
 
-				<span className="spread-counter">
-					{currentIndex + 1} / {spreads.length}
-					<span className="caption-text"> — {spreads[currentIndex].caption}</span>
-				</span>
-
-				<button onClick={nextSpread} disabled={currentIndex === spreads.length - 1} className="nav-btn">
-					Next &rarr;
+				<button onClick={nextSpread} disabled={currentIndex === spreads.length - 1} className="nav-btn nav-btn--next" aria-label="Next page">
+					<img src="/icons/arrow.svg" alt="" className="nav-arrow-icon" />
 				</button>
 			</div>
 		</div>
