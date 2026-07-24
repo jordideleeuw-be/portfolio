@@ -9,41 +9,63 @@ import magazineSpread2 from '../assets/images/magazine-spread2.png';
 import magazineSpread3 from '../assets/images/magazine-spread3.png';
 import magazineBackcover from '../assets/images/magazine-backcover.png';
 
+// Native resolution: cover/backcover (portrait) are 5103x7158; the three
+// spreads (landscape) are 10063x7158. Orientation is known statically per
+// file, so it doesn't need to be derived from a fetched variant.
 const rawSpreads = [
-  { id: 1, src: magazineCover, caption: 'Cover' },
-  { id: 2, src: magazineSpread1, caption: 'Spread 01 — Index & Editorial' },
-  { id: 3, src: magazineSpread2, caption: 'Spread 02 — Visual Essay' },
-  { id: 4, src: magazineSpread3, caption: 'Spread 03 — Typography' },
-  { id: 5, src: magazineBackcover, caption: 'Backcover' },
+  { id: 1, src: magazineCover, caption: 'Cover', orientation: 'portrait' },
+  { id: 2, src: magazineSpread1, caption: 'Spread 01 — Index & Editorial', orientation: 'landscape' },
+  { id: 3, src: magazineSpread2, caption: 'Spread 02 — Visual Essay', orientation: 'landscape' },
+  { id: 4, src: magazineSpread3, caption: 'Spread 03 — Typography', orientation: 'landscape' },
+  { id: 5, src: magazineBackcover, caption: 'Backcover', orientation: 'portrait' },
 ];
 
-// The viewer sits in the 9-column left-pane (up to ~75vw), which can get
-// wide on large/retina screens — the sources have plenty of native
-// resolution to cover that. astro:assets only works inside .astro
-// templates, so the spreads are optimized here and handed to the React
-// viewer as a src + manually-built srcset.
-const spreadWidths = [800, 1200, 1600, 2000, 2400, 3200];
+// Two-stage load, same pattern as FinalWork's showcase image: a solid,
+// genuinely sharp "stage 1" image loads first, then the full responsive
+// (up to near-native resolution) "stage 2" srcset loads in behind it once
+// stage 1 finishes — sequential, not parallel. Widths are capped per
+// orientation near that image's own native resolution (no point requesting
+// beyond it). The sequencing itself happens client-side in
+// MagazineViewer.jsx since each spread needs its own fresh two-stage load
+// on every navigation, not just once on page load.
+// These specific sources compress far worse than a typical photo (dense,
+// grainy scanned pages) — measured directly: portrait hits ~4.3MB by
+// width 3200, landscape ~3.6MB by width 4800, roughly quadratic growth.
+// Ceilings below are picked from real measurements, not native resolution,
+// to keep the largest tier in the low single-digit MB.
+const STAGE1_WIDTH = { portrait: 1600, landscape: 2000 };
+const FULL_WIDTHS = {
+  portrait: [800, 1200, 1600, 2000, 2400],
+  landscape: [1200, 1600, 2000, 2600, 3200, 4000],
+};
 
 const spreads = await Promise.all(
-  rawSpreads.map(async ({ id, src, caption }) => {
-    const variants = await Promise.all(
-      spreadWidths.map((width) => getImage({ src, width, format: 'webp' }))
+  rawSpreads.map(async ({ id, src, caption, orientation }) => {
+    const stage1 = await getImage({ src, width: STAGE1_WIDTH[orientation], format: 'webp' });
+    const fullVariants = await Promise.all(
+      FULL_WIDTHS[orientation].map((width) => getImage({ src, width, format: 'webp' }))
     );
-    const srcSet = variants.map((v) => `${v.src} ${v.attributes.width}w`).join(', ');
-    const { width, height } = variants.at(-1).attributes;
-    const orientation = width >= height ? 'landscape' : 'portrait';
-    return { id, image: variants.at(-1).src, srcSet, caption, orientation, aspectRatio: width / height };
+    const fullSrcSet = fullVariants.map((v) => `${v.src} ${v.attributes.width}w`).join(', ');
+    return {
+      id,
+      caption,
+      orientation,
+      stage1Src: stage1.src,
+      stage1Width: stage1.attributes.width,
+      stage1Height: stage1.attributes.height,
+      fullSrcSet,
+    };
   })
 );
 
-// Every page shares this one frame ratio (taken from the landscape spreads)
-// so the viewer never changes height when you navigate between the portrait
-// cover/backcover and the wider spreads — cover/backcover render centered
-// and letterboxed inside the same-height frame instead of using their own
-// (much taller) aspect ratio. Expressed as a padding-top percentage (the
-// classic aspect-ratio hack) rather than the `aspect-ratio` property — see
-// the comment on .spread-frame for why.
-const frameAspectRatio = spreads.find((s) => s.orientation === 'landscape').aspectRatio;
+// Every page shares this one frame ratio (the landscape spreads' native
+// 10063x7158) so the viewer never changes height when you navigate between
+// the portrait cover/backcover and the wider spreads — cover/backcover
+// render centered and letterboxed inside the same-height frame instead of
+// using their own (much taller) aspect ratio. Expressed as a padding-top
+// percentage (the classic aspect-ratio hack) rather than the `aspect-ratio`
+// property — see the comment on .spread-frame for why.
+const frameAspectRatio = 10063 / 7158;
 const framePaddingTopPercent = (1 / frameAspectRatio) * 100;
 ---
 
@@ -105,7 +127,18 @@ const framePaddingTopPercent = (1 / frameAspectRatio) * 100;
     /* filter (not box-shadow) so the shadow hugs the visible, letterboxed
        image content instead of the full (invisible) frame rectangle. */
     filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15));
+  }
+
+  /* Two-stage load: stage 1 (the base .spread-image) renders immediately
+     and stays visible; stage 2 (this) sits on top at the same position and
+     only fades in once its own full-res srcset has actually loaded. */
+  .spread-image--full {
+    opacity: 0;
     transition: opacity 0.3s ease-in-out;
+  }
+
+  .spread-image--full.loaded {
+    opacity: 1;
   }
 
   /* Knoppen styling */

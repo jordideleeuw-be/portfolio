@@ -1,12 +1,27 @@
 ---
 import { Image, getImage } from 'astro:assets';
 import SplitLayout from './SplitLayout.jsx';
-import jidliInclusions from '../assets/images/JIDLI_INCLUSIONS.jpg';
+import jidliInclusions from '../assets/images/JIDLI_INCLUSIONS.png';
 import showreelPosterSrc from '../assets/images/showreel-poster.jpg';
 
 // A plain URL (not the <Image> component) since it's used as a native
 // <video poster> attribute, not rendered as its own <img>.
 const showreelPoster = await getImage({ src: showreelPosterSrc, width: 800, format: 'webp' });
+
+// Two-stage load for the showcase image: a solid, genuinely sharp 2600px
+// version loads first (fast, looks good on virtually any screen), then a
+// second request for the full-resolution responsive version (up to 7600px,
+// for large/HiDPI displays) only starts once that first one finishes —
+// sequential, not parallel, so the big request never competes with the
+// first for bandwidth. No blur/scale tricks — both stages are genuinely
+// sharp images, just different sizes.
+const showcaseStage1 = await getImage({ src: jidliInclusions, width: 2600, format: 'webp' });
+
+const showcaseFullWidths = [2000, 2600, 3200, 4000, 5200, 6400, 7600];
+const showcaseFullVariants = await Promise.all(
+  showcaseFullWidths.map((width) => getImage({ src: jidliInclusions, width, format: 'webp' }))
+);
+const showcaseFullSrcset = showcaseFullVariants.map((v) => `${v.src} ${v.attributes.width}w`).join(', ');
 ---
 
 <section class="screen final-work">
@@ -18,14 +33,17 @@ const showreelPoster = await getImage({ src: showreelPosterSrc, width: 800, form
   >
     {/* ALLES WAT JE HIER TUSSEN ZET, KOMT AUTOMATISCH IN DE 9-KOLOMMEN LINKERKANT! */}
     <div slot="leftContent" class="my-visuals">
-      <Image
-        src={jidliInclusions}
-        alt="JIDLI — Hybrid Album showcase"
-        class="showcase-image"
-        widths={[400, 800, 1200, 1600, 2000, 2554]}
-        sizes="(max-width: 900px) 100vw, 75vw"
-        format="webp"
-      />
+      <div class="showcase-wrapper">
+        <img
+          src={showcaseStage1.src}
+          alt="JIDLI — Hybrid Album showcase"
+          class="showcase-image"
+          id="showcase-stage1"
+          width={showcaseStage1.attributes.width}
+          height={showcaseStage1.attributes.height}
+          loading="lazy"
+        />
+      </div>
       <div class="placeholder-row">
         {/* Native <video poster> + preload="none": the browser shows the
             poster on its own, and never requests the 13MB video file until
@@ -47,6 +65,34 @@ const showreelPoster = await getImage({ src: showreelPosterSrc, width: 800, form
     </div>
   </SplitLayout>
 </section>
+
+<script define:vars={{ showcaseFullSrcset }}>
+  // Sequential two-stage upgrade: only start fetching the full-res
+  // srcset once the fast 2600px stage-1 image has actually finished
+  // loading, so the two never compete for bandwidth.
+  const stage1 = document.getElementById('showcase-stage1');
+  const wrapper = stage1?.closest('.showcase-wrapper');
+
+  function upgradeShowcaseToFullRes() {
+    if (!wrapper) return;
+    const stage2 = document.createElement('img');
+    stage2.alt = '';
+    stage2.setAttribute('aria-hidden', 'true');
+    stage2.className = 'showcase-image showcase-image--full';
+    stage2.sizes = '(max-width: 900px) 100vw, 95vw';
+    stage2.srcset = showcaseFullSrcset;
+    stage2.addEventListener('load', () => stage2.classList.add('loaded'), { once: true });
+    wrapper.appendChild(stage2);
+  }
+
+  if (stage1 instanceof HTMLImageElement) {
+    if (stage1.complete) {
+      upgradeShowcaseToFullRes();
+    } else {
+      stage1.addEventListener('load', upgradeShowcaseToFullRes, { once: true });
+    }
+  }
+</script>
 
 <script>
   const video = document.getElementById('showreel-video');
@@ -74,10 +120,35 @@ const showreelPoster = await getImage({ src: showreelPosterSrc, width: 800, form
     gap: var(--grid-margin);
   }
 
+  /* Two-stage load, both genuinely sharp — no blur trick. Stage 1 (2600px)
+     is a normal in-flow image, so it establishes the wrapper's real height
+     via its own width:100%/height:auto aspect ratio. Stage 2 (full-res,
+     injected by the script below once stage 1 finishes) sits absolutely
+     on top of that same box and crossfades in once it's loaded, then
+     visually replaces stage 1 — no layout shift either way. */
+  .showcase-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
   .showcase-image {
     width: 100%;
     height: auto;
     display: block;
+  }
+
+  .showcase-image--full {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .showcase-image--full.loaded {
+    opacity: 1;
   }
 
   /* Same 4:3 padding-top box as .placeholder-box, but holding the poster

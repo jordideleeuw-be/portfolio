@@ -1,66 +1,12 @@
 ---
-// Spacer.astro — full-width white breathing room between screens, with an
-// optional decorative detail SVG accent on the right (detail1–4.svg).
-import detail1 from '../assets/images/detail1.svg';
-import detail2 from '../assets/images/detail2.svg';
-import detail3 from '../assets/images/detail3.svg';
-import detail4 from '../assets/images/detail4.svg';
-
-const detailMap = { 1: detail1, 2: detail2, 3: detail3, 4: detail4 };
-
-interface Props {
-  detail?: 1 | 2 | 3 | 4;
-  /** Vertical nudge in vh (viewport height) from center — scales with screen size like the rest of the spacer. Negative moves it up, positive moves it down. */
-  yOffset?: number;
-  /** Rotation in degrees. */
-  rotate?: number;
-}
-
-const { detail, yOffset = 0, rotate = 0 } = Astro.props;
-const detailSrc = detail ? detailMap[detail].src : undefined;
+// Spacer.astro — full-width white breathing room between screens.
 ---
-<div class="spacer">
-  {detailSrc && (
-    <img
-      src={detailSrc}
-      alt=""
-      class="spacer-detail"
-      style={`--y-offset: ${yOffset}vh; --rotate: ${rotate}deg`}
-    />
-  )}
-</div>
+<div class="spacer"></div>
 
 <style>
   .spacer {
-    /* A modest, mostly-fixed gap — NOT what the detail artwork sizes off
-       of (see .spacer-detail below). */
-    --spacer-height: clamp(100px, 24vh, 300px);
     width: 100%;
-    height: var(--spacer-height);
+    height: clamp(100px, 16vh, 300px);
     background-color: #FFF;
-    position: relative;
-    /* No overflow:hidden — .spacer-detail is deliberately sized larger
-       than the bar so it spills into the sections above and below. */
-  }
-
-  /* Sized off vw (viewport WIDTH), not vh — every other spacing value in
-     this design system (--grid-margin, --grid-gutter, the cqi units in
-     Layout.astro/Hero.astro) scales off width, not height. Tying this to
-     vh instead made it look wildly different across window shapes (a
-     short-wide window vs. a tall-narrow one) even at the same width —
-     sizing off vw keeps it visually consistent with the rest of the page
-     at any aspect ratio. */
-  .spacer-detail {
-    position: absolute;
-    top: 50%;
-    right: var(--grid-margin);
-    /* --y-offset/--rotate come from the yOffset/rotate props (inline
-       style), defaulting to 0 so they're a no-op unless explicitly set. */
-    transform: translateY(calc(-50% + var(--y-offset, 0vh))) rotate(var(--rotate, 0deg));
-    width: clamp(120px, 22vw, 420px);
-    height: clamp(120px, 22vw, 420px);
-    z-index: 20;
-    display: block;
-    pointer-events: none;
   }
 </style>
