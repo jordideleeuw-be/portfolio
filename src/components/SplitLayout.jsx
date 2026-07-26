@@ -39,8 +39,8 @@ export default function SplitLayout({ leftContent, title, description, tools, li
 				>
 					{/* CSS (not JS) swaps which one shows, based on viewport width —
 					    see .btn-text-full/.btn-text-short in SplitLayout.module.css. */}
-					<span className={styles["btn-text-full"]}>{isOpen ? "Read Less" : "Read More"}</span>
-					<span className={styles["btn-text-short"]}>{isOpen ? "Less" : "More"}</span>
+					<span className={styles["btn-text-full"]}>{isOpen ? "Lees minder" : "Lees meer"}</span>
+					<span className={styles["btn-text-short"]}>{isOpen ? "Minder" : "Meer"}</span>
 				</button>
 			</div>
 
@@ -51,7 +51,7 @@ export default function SplitLayout({ leftContent, title, description, tools, li
 					<div className={styles["project-details-content"]}>
 						<div className={styles["info-row"]}>
 							<div className={`${styles["info-block"]} ${styles["about-block"]}`}>
-								<h3>About</h3>
+								<h3>Over</h3>
 								{/* A literal newline inside description doesn't create a visual
 								    break on its own — HTML collapses whitespace, so a single
 								    <p> just runs it all together regardless of \n in the source
@@ -76,7 +76,7 @@ export default function SplitLayout({ leftContent, title, description, tools, li
 
 							{tools && tools.length > 0 && (
 								<div className={`${styles["info-block"]} ${styles["tools-block"]}`}>
-									<h3>Software Used</h3>
+									<h3>Gebruikte programma's</h3>
 									<div className={styles["tools-list"]}>
 										{tools.map((tool, index) => (
 											<ToolIcon key={index} name={tool} />

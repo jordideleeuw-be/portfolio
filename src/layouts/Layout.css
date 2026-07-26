@@ -73,6 +73,16 @@
      just to read as a thin line. */
   --image-border-width: 0.1cqi;
   --arrow-outline-width: 3cqi;
+
+  /* Shared by .btn-contact (Hero.module.css) and .read-more-btn
+     (SplitLayout.module.css) so "KOM IN CONTACT"/"Read More"/"Read Less"
+     render at genuinely identical size — those two buttons live in
+     different containers (.hero-grid vs .project-block), so even
+     matching cqi formulas would still compute different actual pixel
+     values between them. A plain rem value referenced by both is the only
+     way to guarantee they're actually the same, not just similar. */
+  --corner-btn-font-size: 1rem;
+  --corner-btn-width: 11rem;
 }
 
 *, *::before, *::after {

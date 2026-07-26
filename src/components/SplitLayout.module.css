@@ -59,7 +59,7 @@
 	color: #000000;
 	font-family: var(--font-base);
 	font-weight: 600;
-	font-size: 1rem;
+	font-size: var(--corner-btn-font-size);
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
 	padding: 0.7rem 0;
@@ -67,14 +67,11 @@
 	transition:
 		background-color 0.2s ease,
 		color 0.2s ease;
-	/* Grid-locked width — exactly one column plus one gutter (against
-     .project-block's cqi context), not an arbitrary rem value. Fixed
-     (not content-based) so the button doesn't resize between its two
-     states — "Read More" and "Read Less" render at slightly different
-     natural widths otherwise — with the text centered inside either way.
-     clamp()'d for the same reason as the hero buttons/nav arrows: cqi
-     tied to a near-full-page-width container scales forever without one. */
-	width: clamp(6rem, calc((100cqi - 11 * var(--grid-gutter)) / 12 + var(--grid-gutter)), 11rem);
+	/* Same shared width as .btn-contact (Hero.module.css) — fixed (not
+     content-based) so the button doesn't resize between its two states
+     either, "Read More" and "Read Less" render at slightly different
+     natural widths otherwise. */
+	width: var(--corner-btn-width);
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -83,6 +80,15 @@
 .read-more-btn:hover {
 	background-color: #000000;
 	color: #ffffff;
+}
+
+/* Mobile: "Meer"/"Minder" is much shorter than "Lees meer"/"Lees minder",
+   so the shared desktop width (sized for the longer text) leaves it way
+   oversized — one column of the mobile 4-column grid instead. */
+@media (max-width: 768px) {
+	.read-more-btn {
+		width: calc((100cqi - 3 * var(--grid-gutter)) / 4);
+	}
 }
 
 /* "Read More"/"Read Less" on desktop, "More"/"Less" on mobile — both

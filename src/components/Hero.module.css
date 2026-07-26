@@ -63,25 +63,48 @@
   z-index: 50;
 }
 
-/* Outline style, matching .read-more-btn in Layout.astro. */
+/* Outline style, matching .read-more-btn in SplitLayout.module.css — same
+   shared font-size/width variables too, so they're genuinely identical. */
 .btn-contact {
   background-color: transparent;
   border: 2px solid #000000;
   color: #000000;
   text-decoration: none;
-  font-size: clamp(0.7rem, 0.85cqi, 0.95rem);
+  font-size: var(--corner-btn-font-size);
   font-weight: 600;
   height: 2.5cqi;
   min-height: 36px;
   max-height: 44px;
   padding: 0 1cqi;
-  flex: 1;
+  width: var(--corner-btn-width);
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   letter-spacing: 0.05em;
   white-space: nowrap;
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Mobile: the shared desktop width doesn't fit this cell at all — columns
+   11-12 of the 12-column hero grid are only ~58px wide at phone widths, so
+   the fixed shared width was overflowing straight past the edge of the
+   screen. Filling the actual (correctly-positioned) grid cell instead of a
+   fixed width is what "following the grid" means here — but that cell is
+   still too narrow for "KOM IN CONTACT" on one line at any legible size,
+   so it wraps to two lines instead of overflowing. */
+@media (max-width: 768px) {
+  .btn-contact {
+    width: 100%;
+    height: auto;
+    min-height: 44px;
+    max-height: none;
+    padding: 0.4rem 0.3rem;
+    font-size: 0.6rem;
+    line-height: 1.2;
+    white-space: normal;
+    text-align: center;
+  }
 }
 
 .btn-contact:hover {
