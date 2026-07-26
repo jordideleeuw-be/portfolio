@@ -1,0 +1,174 @@
+.screen {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #fff;
+}
+
+.my-visuals {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--grid-margin);
+}
+
+/* Two-stage load, both genuinely sharp — no blur trick. Stage 1 (2600px)
+   is a normal in-flow image, so it establishes the wrapper's real height
+   via its own width:100%/height:auto aspect ratio. Stage 2 (full-res,
+   injected by the script below once stage 1 finishes) sits absolutely
+   on top of that same box and crossfades in once it's loaded, then
+   visually replaces stage 1 — no layout shift either way. */
+.showcase-wrapper {
+  position: relative;
+  width: 100%;
+  border: var(--image-border-width) solid #000000;
+}
+
+.showcase-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.showcase-image--full {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.showcase-image--full.loaded {
+  opacity: 1;
+}
+
+/* Same 4:3 padding-top box as .placeholder-box, but holding the poster
+   image (then the video once clicked) instead of a placeholder label. */
+.video-tile {
+  width: 100%;
+  height: 0;
+  padding-top: 75%;
+  position: relative;
+  background-color: #000000;
+  overflow: hidden;
+  cursor: pointer;
+  border: var(--image-border-width) solid #000000;
+}
+
+.video-poster {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.video-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.92);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.video-play-btn:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+  background-color: #ffffff;
+}
+
+.video-play-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-left: 3px; /* optical centering for the play triangle */
+  color: #000000;
+}
+
+/* Real 4-column-span slice of the site's 12-column grid (var(--grid-gutter),
+   same as .grid-overlay/.hero-grid) instead of an independent repeat(3, 1fr)
+   with a flat 1rem gap — that local grid only coincidentally lined up with
+   the real grid at some viewport widths and drifted at others. */
+.placeholder-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  row-gap: var(--grid-gutter);
+}
+
+.placeholder-row > * {
+  grid-column: span 4;
+}
+
+/* Mobile: same treatment as Internship's tile-grid — 4-column grid instead
+   of 12 (each item still spans 4, so on a 4-column grid that's full width
+   and every tile stacks on its own row automatically), row-gap matching
+   the side margin instead of the smaller column gutter. */
+@media (max-width: 768px) {
+  .placeholder-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    row-gap: var(--grid-margin);
+  }
+}
+
+/* 4:3 ratio via the padding-top percentage hack (not the `aspect-ratio`
+   property) — this sits inside SplitLayout's animated info-panel grid,
+   and aspect-ratio doesn't reliably recompute across that transition. */
+.placeholder-box {
+  width: 100%;
+  height: 0;
+  padding-top: 75%;
+  position: relative;
+  background-color: rgba(0, 0, 0, 0.15);
+  border: var(--image-border-width) solid #000000;
+  overflow: hidden;
+}
+
+/* Same two-stage crossfade treatment as Internship's tile images —
+   absolute, object-fit: cover, filling the 4:3 .placeholder-box exactly. */
+.tile-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tile-image--full {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tile-image--full.loaded {
+  opacity: 1;
+}
+
+.placeholder-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(0, 0, 0, 0.55);
+}

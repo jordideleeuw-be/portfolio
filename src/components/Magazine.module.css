@@ -1,0 +1,31 @@
+.screen {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #fff;
+}
+
+.content-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.desktop-viewer {
+  width: 100%;
+}
+
+.mobile-viewer {
+  display: none;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .desktop-viewer {
+    display: none;
+  }
+
+  .mobile-viewer {
+    display: block;
+  }
+}

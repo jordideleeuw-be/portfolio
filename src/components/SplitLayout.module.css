@@ -1,0 +1,307 @@
+/* =========================================================
+   ⚡ FULL-WIDTH PROJECT BLOCK
+   ---------------------------------------------------------
+   Content spans all 12 columns. Title + "Read More" button sit
+   below it; clicking the button drops open the description/
+   software list inline. The grid-template-rows 0fr/1fr trick
+   animates the reveal smoothly without needing a JS-measured
+   height.
+   ========================================================= */
+.project-block {
+	width: 100%;
+	padding: 0 var(--grid-margin);
+	box-sizing: border-box;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	font-family: var(--font-base);
+	/* Establishes the cqi context for .tool-icon below (the title/details/
+     tools-list area doesn't sit inside .project-media, which is what the
+     image borders use, so it needs its own container here). */
+	container-type: inline-size;
+}
+
+.project-media {
+	width: 100%;
+	padding: var(--grid-margin) 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	/* Establishes the cqi context for --image-border-width, shared by every
+     project's images (FinalWork/Magazine/Internship all render into this
+     same wrapper via SplitLayout's leftContent slot). */
+	container-type: inline-size;
+}
+
+.project-header {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--grid-gutter);
+	padding-bottom: 2vh;
+}
+
+.project-title {
+	font-family: var(--font-base);
+	font-weight: 800;
+	font-size: clamp(1.75rem, 3.5vw, 3rem);
+	text-transform: uppercase;
+	color: #000000;
+	margin: 0;
+}
+
+.read-more-btn {
+	flex-shrink: 0;
+	background: none;
+	border: 2px solid #000000;
+	color: #000000;
+	font-family: var(--font-base);
+	font-weight: 600;
+	font-size: 1rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	padding: 0.7rem 0;
+	cursor: pointer;
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease;
+	/* Grid-locked width — exactly one column plus one gutter (against
+     .project-block's cqi context), not an arbitrary rem value. Fixed
+     (not content-based) so the button doesn't resize between its two
+     states — "Read More" and "Read Less" render at slightly different
+     natural widths otherwise — with the text centered inside either way.
+     clamp()'d for the same reason as the hero buttons/nav arrows: cqi
+     tied to a near-full-page-width container scales forever without one. */
+	width: clamp(6rem, calc((100cqi - 11 * var(--grid-gutter)) / 12 + var(--grid-gutter)), 11rem);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.read-more-btn:hover {
+	background-color: #000000;
+	color: #ffffff;
+}
+
+/* "Read More"/"Read Less" on desktop, "More"/"Less" on mobile — both
+   variants render (JSX), CSS just picks which one is visible, so this is
+   pure display toggling, not conditional rendering. */
+.btn-text-short {
+	display: none;
+}
+
+@media (max-width: 768px) {
+	.btn-text-full {
+		display: none;
+	}
+
+	.btn-text-short {
+		display: inline;
+	}
+}
+
+.project-details {
+	display: grid;
+	grid-template-rows: 0fr;
+	transition: grid-template-rows 0.4s ease;
+}
+
+.project-details.open {
+	grid-template-rows: 1fr;
+}
+
+.project-details-inner {
+	overflow: hidden;
+	min-height: 0;
+}
+
+.project-details-content {
+	padding-top: 3vh;
+	display: flex;
+	flex-direction: column;
+	gap: 3vh;
+}
+
+.info-block h3 {
+	font-family: var(--font-base);
+	font-weight: 400;
+	font-size: 0.85rem;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: #555555;
+	margin-bottom: 0.8vh;
+}
+
+.info-block p {
+	font-family: var(--font-base);
+	font-size: 1.3cqi;
+	line-height: 1.5;
+	color: #333333;
+	text-transform: none;
+	font-weight: 400;
+}
+
+/* Space between separate paragraph blocks (description split on line
+   breaks in SplitLayout.jsx) — not needed before the first one. */
+.info-block p + p {
+	margin-top: 1em;
+}
+
+/* Mobile: bigger, and a flat rem instead of raw cqi. The desktop 1.3cqi is
+   against .project-block's inline-size, which at mobile widths is small
+   enough that 1.3cqi computes to ~5px — not just "small", actually
+   unreadable. A plain rem sidesteps that failure mode entirely instead of
+   just picking a bigger cqi multiplier that would still hit the same wall
+   on a narrower phone. */
+@media (max-width: 768px) {
+	.info-block p {
+		font-size: 1.15rem;
+	}
+}
+
+/* Second, SMALLER ceiling for .project-title/.info-block p, only past a
+   genuinely wide monitor — the rules above are untouched below this
+   breakpoint, so a MacBook-class display keeps exactly the size that
+   already looks right there. cqi (against .project-block, same
+   container the tool icons use) rather than a flat override, so it
+   still eases in smoothly above this width instead of jumping to one
+   fixed number and going flat again.
+   1800px comfortably clears a maximized 16" MacBook Pro (1728px logical)
+   — raise this if your MacBook is wider than that and this ever kicks in
+   on it too, or lower it if your external monitor still looks big. */
+@media (min-width: 1800px) {
+	.project-title {
+		font-size: clamp(1.75rem, 2.2cqi, 2.5rem);
+	}
+
+	.info-block p {
+		font-size: clamp(0.9rem, 1.1cqi, 1.1rem);
+	}
+}
+
+/* About + Software Used side by side, on the same 12-column grid used
+   site-wide. Software Used is capped at 5 columns (not left to grow with
+   however much room is available) so its icons wrap onto a new row
+   inside that width instead of spreading out across a wide single row. */
+.info-row {
+	display: grid;
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+	column-gap: var(--grid-gutter);
+	align-items: flex-start;
+	width: 100%;
+}
+
+.about-block {
+	grid-column: span 6;
+}
+
+/* No Software Used block (e.g. Internship before tools existed) — About
+   takes the full width instead of stopping at 6 columns for no reason. */
+.info-row > .about-block:only-child {
+	grid-column: span 12;
+}
+
+/* Starts at column 8 (not auto-placed right after About's 6 columns) so
+   column 7 sits empty as a gap between the two blocks. */
+.tools-block {
+	grid-column: 8 / span 5;
+}
+
+/* Mobile: stacked full-width (4 of 4 columns) instead of side by side, and
+   reordered — Software Used directly under the title, About under that —
+   via `order` rather than changing the actual markup order, so desktop's
+   About-first layout is untouched. */
+@media (max-width: 768px) {
+	.info-row {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		/* Stacked into two rows now (About + Software Used no longer sit
+		   side by side), so column-gap alone doesn't add any space between
+		   them — same row-gap convention as the Internship tile stack,
+		   just 4x it here. */
+		row-gap: calc(var(--grid-margin) * 4);
+	}
+
+	.about-block {
+		grid-column: span 4;
+		order: 2;
+	}
+
+	.tools-block {
+		grid-column: span 4;
+		order: 1;
+	}
+}
+
+/* Standard fixed gap (cqi, not px/vw), and flex-wrap: nowrap — icons must
+   always stay on one row (see .tool-icon below for how that's actually
+   guaranteed, not just requested). */
+.tools-list {
+	display: flex;
+	flex-wrap: nowrap;
+	gap: clamp(6px, 1cqi, 16px);
+	align-items: center;
+}
+
+/* Jouw SVG's staan al op hetzelfde vierkante artboard — gewoon
+   direct tonen, geen wrapper, geen achtergrond, geen padding. */
+/* clamp(36-50px) is the PREFERRED size (cqi against .project-block, same
+   as everywhere else) — but flex-shrink (min-width:0 overrides the
+   browser's default "never shrink an image below its intrinsic size")
+   lets every icon shrink below that whenever the row is too narrow to
+   fit all of them at once, instead of wrapping. That's what actually
+   guarantees one row at every viewport width — a fixed/capped size alone
+   can't, since the row's own width and the icon's capped size don't
+   scale at the same rate, so there's always some viewport range where a
+   fixed size overflows (this is why it broke on one screen but not
+   another: not "wider is worse", just a mismatch between the two). */
+.tool-icon {
+	flex: 0 1 clamp(36px, 4cqi, 50px);
+	min-width: 0;
+	height: auto;
+	aspect-ratio: 1;
+	display: block;
+}
+
+/* Mobile: icons a bit bigger than desktop (not the full 2x this started
+   at — too big at actual phone width). Also switches the row to wrap
+   instead of shrink-to-fit-one-row — the one-row guarantee would just
+   fight any increase here and shrink them straight back down. Wrapping to
+   a second/third row is fine on mobile; it isn't the single-row desktop
+   layout that rule was for. */
+@media (max-width: 768px) {
+	.tools-list {
+		flex-wrap: wrap;
+	}
+
+	.tool-icon {
+		flex: 0 1 clamp(48px, 5cqi, 64px);
+	}
+}
+
+.visit-block {
+	margin-top: 1.5rem;
+}
+
+.visit-button {
+	display: inline-block;
+	text-align: center;
+	background-color: #000000;
+	border: 2px solid #000000;
+	color: #ffffff;
+	font-family: var(--font-base);
+	font-weight: 600;
+	font-size: 1.05rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	text-decoration: none;
+	padding: 0.9rem 2rem;
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease;
+}
+
+.visit-button:hover {
+	background-color: #333333;
+}

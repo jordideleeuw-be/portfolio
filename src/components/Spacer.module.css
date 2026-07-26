@@ -1,0 +1,9 @@
+.spacer {
+  width: 100%;
+  height: clamp(150px, 24vh, 450px);
+  background-color: #FFF;
+}
+
+.spacer--compact {
+  height: clamp(100px, 16vh, 300px);
+}

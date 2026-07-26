@@ -5,12 +5,12 @@ import Hero from '../components/Hero.astro';
 import FinalWork from '../components/FinalWork.astro';
 import Internship from '../components/Internship.astro';
 import Magazine from '../components/Magazine.astro';
-import CvSummary from '../components/CvSummary.astro';
 import Spacer from '../components/Spacer.astro';
+import styles from './index.module.css';
 ---
 
 <Layout>
-  <main>
+  <main class={styles.main}>
     <Hero />
     <Spacer compact />
     <FinalWork />
@@ -21,31 +21,7 @@ import Spacer from '../components/Spacer.astro';
     <Spacer />
   </main>
 
-  <footer class="footer">
+  <footer class={styles.footer}>
     <p>© 2026 Jordi — Portfolio Footer</p>
   </footer>
 </Layout>
-
-<style>
-  main {
-    width: 100%;
-    font-family: system-ui, -apple-system, sans-serif;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: -0.02em;
-    overflow-x: hidden;
-  }
-
-  .footer {
-    /* HIER IS DE WIDTH: 100% WEGGEHAALD EN BORDER-BOX TOEGEVOEGD! */
-    box-sizing: border-box;
-    padding: 1cqi 2rem;
-    /* background-color: #fff; */
-    background-color: #000;
-    color: #666666;
-    /* border-top: 0.2cqi solid #000000; */
-    text-align: center;
-    font-family: system-ui, -apple-system, sans-serif;
-    overflow-x: hidden;
-  }
-</style>

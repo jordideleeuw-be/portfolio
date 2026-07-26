@@ -1,0 +1,18 @@
+.main {
+  width: 100%;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  overflow-x: hidden;
+}
+
+.footer {
+  box-sizing: border-box;
+  padding: 1cqi 2rem;
+  background-color: #000;
+  color: #666666;
+  text-align: center;
+  font-family: system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}

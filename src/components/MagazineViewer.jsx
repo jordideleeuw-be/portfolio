@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import styles from "./MagazineViewer.module.css";
 
 // Two-stage load for one spread: stage 1 (a solid, genuinely sharp image)
 // renders immediately; only once IT finishes loading does stage 2 (the
@@ -14,7 +15,7 @@ function ArrowIcon({ disabled }) {
 	return (
 		<svg
 			viewBox="0 0 450 300"
-			className={`nav-arrow-icon${disabled ? " nav-arrow-icon--disabled" : ""}`}
+			className={`${styles["nav-arrow-icon"]}${disabled ? " " + styles["nav-arrow-icon--disabled"] : ""}`}
 			aria-hidden="true"
 		>
 			<polygon
@@ -41,15 +42,15 @@ function SpreadImage({ spread, priority }) {
 	}, []);
 
 	return (
-		<div className="spread-content">
-			<div className={`spread-photo spread-photo--${spread.orientation}`}>
+		<div className={styles["spread-content"]}>
+			<div className={`${styles["spread-photo"]} ${styles[`spread-photo--${spread.orientation}`]}`}>
 				<img
 					ref={stage1Ref}
 					src={spread.stage1Src}
 					width={spread.stage1Width}
 					height={spread.stage1Height}
 					alt={spread.caption}
-					className="spread-image"
+					className={styles["spread-image"]}
 					loading={priority ? "eager" : "lazy"}
 					onLoad={() => setStage1Loaded(true)}
 				/>
@@ -59,7 +60,7 @@ function SpreadImage({ spread, priority }) {
 						sizes="(max-width: 900px) 100vw, 95vw"
 						alt=""
 						aria-hidden="true"
-						className={`spread-image spread-image--full ${stage2Loaded ? "loaded" : ""}`}
+						className={`${styles["spread-image"]} ${styles["spread-image--full"]} ${stage2Loaded ? styles.loaded : ""}`}
 						onLoad={() => setStage2Loaded(true)}
 					/>
 				)}
@@ -68,10 +69,11 @@ function SpreadImage({ spread, priority }) {
 	);
 }
 
-export default function MagazineViewer({ spreads, framePaddingTopPercent }) {
-	// Starts on Spread 1 (index 1), not the cover (index 0) — prev still
-	// goes back to the cover, it's just not the first thing shown.
-	const [currentIndex, setCurrentIndex] = useState(1);
+export default function MagazineViewer({ spreads, framePaddingTopPercent, initialIndex = 1 }) {
+	// Desktop starts on Spread 1 (index 1), not the cover — prev still goes
+	// back to it, it's just not the first thing shown. Mobile passes
+	// initialIndex={0} to start on the cover instead (see Magazine.astro).
+	const [currentIndex, setCurrentIndex] = useState(initialIndex);
 	const current = spreads[currentIndex];
 
 	// Functie voor de volgende pagina
@@ -89,22 +91,22 @@ export default function MagazineViewer({ spreads, framePaddingTopPercent }) {
 	};
 
 	return (
-		<div className="magazine-container">
+		<div className={styles["magazine-container"]}>
 			{/* HET BEELD */}
 			<div
-				className={`spread-frame spread-frame--${current.orientation}`}
+				className={`${styles["spread-frame"]} ${styles[`spread-frame--${current.orientation}`]}`}
 				style={{ paddingTop: `${framePaddingTopPercent}%` }}
 			>
-				<SpreadImage key={current.id} spread={current} priority={currentIndex === 1} />
+				<SpreadImage key={current.id} spread={current} priority={currentIndex === initialIndex} />
 			</div>
 
 			{/* DE NAVIGATIE */}
-			<div className="magazine-nav">
-				<button onClick={prevSpread} disabled={currentIndex === 0} className="nav-btn nav-btn--prev" aria-label="Previous page">
+			<div className={styles["magazine-nav"]}>
+				<button onClick={prevSpread} disabled={currentIndex === 0} className={`${styles["nav-btn"]} ${styles["nav-btn--prev"]}`} aria-label="Previous page">
 					<ArrowIcon disabled={currentIndex === 0} />
 				</button>
 
-				<button onClick={nextSpread} disabled={currentIndex === spreads.length - 1} className="nav-btn nav-btn--next" aria-label="Next page">
+				<button onClick={nextSpread} disabled={currentIndex === spreads.length - 1} className={`${styles["nav-btn"]} ${styles["nav-btn--next"]}`} aria-label="Next page">
 					<ArrowIcon disabled={currentIndex === spreads.length - 1} />
 				</button>
 			</div>

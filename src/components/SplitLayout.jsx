@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import styles from "./SplitLayout.module.css";
 
 // Zet je eigen SVG's in public/icons/ — bestandsnaam = tool-naam in
 // kleine letters, spaties vervangen door streepjes. Bijvoorbeeld:
@@ -8,7 +9,7 @@ function slugify(name) {
 }
 
 function ToolIcon({ name }) {
-	return <img src={`/icons/${slugify(name)}.svg`} alt={name} title={name} className="tool-icon" />;
+	return <img src={`/icons/${slugify(name)}.svg`} alt={name} title={name} className={styles["tool-icon"]} />;
 }
 
 // Standard utm_source/utm_medium query params — most analytics tools
@@ -25,28 +26,31 @@ export default function SplitLayout({ leftContent, title, description, tools, li
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<div className="project-block">
+		<div className={styles["project-block"]}>
 			{/* Media/content — nu full-width, 12 kolommen breed. */}
-			<div className="project-media">{leftContent}</div>
+			<div className={styles["project-media"]}>{leftContent}</div>
 
-			<div className="project-header">
-				<h2 className="project-title">{title}</h2>
+			<div className={styles["project-header"]}>
+				<h2 className={styles["project-title"]}>{title}</h2>
 				<button
-					className="read-more-btn"
+					className={styles["read-more-btn"]}
 					onClick={() => setIsOpen(!isOpen)}
 					aria-expanded={isOpen}
 				>
-					{isOpen ? "Read Less" : "Read More"}
+					{/* CSS (not JS) swaps which one shows, based on viewport width —
+					    see .btn-text-full/.btn-text-short in SplitLayout.module.css. */}
+					<span className={styles["btn-text-full"]}>{isOpen ? "Read Less" : "Read More"}</span>
+					<span className={styles["btn-text-short"]}>{isOpen ? "Less" : "More"}</span>
 				</button>
 			</div>
 
 			{/* Klapt open/dicht via grid-template-rows (0fr <-> 1fr) — geen
 			    JS-gemeten hoogte nodig, animeert vanzelf soepel. */}
-			<div className={`project-details ${isOpen ? "open" : ""}`}>
-				<div className="project-details-inner">
-					<div className="project-details-content">
-						<div className="info-row">
-							<div className="info-block about-block">
+			<div className={`${styles["project-details"]} ${isOpen ? styles.open : ""}`}>
+				<div className={styles["project-details-inner"]}>
+					<div className={styles["project-details-content"]}>
+						<div className={styles["info-row"]}>
+							<div className={`${styles["info-block"]} ${styles["about-block"]}`}>
 								<h3>About</h3>
 								{/* A literal newline inside description doesn't create a visual
 								    break on its own — HTML collapses whitespace, so a single
@@ -61,9 +65,9 @@ export default function SplitLayout({ leftContent, title, description, tools, li
 								    zit in about-block zodat het onder de about-tekst zelf staat,
 								    even breed als die kolom, niet de volle breedte. */}
 								{liveUrl && (
-									<div className="visit-block">
+									<div className={styles["visit-block"]}>
 										<h3>{liveLabel || "Bekijk het project"}</h3>
-										<a href={withSourceTracking(liveUrl)} target="_blank" rel="noopener" className="visit-button">
+										<a href={withSourceTracking(liveUrl)} target="_blank" rel="noopener" className={styles["visit-button"]}>
 											{liveButtonText || "BEZOEK"}
 										</a>
 									</div>
@@ -71,9 +75,9 @@ export default function SplitLayout({ leftContent, title, description, tools, li
 							</div>
 
 							{tools && tools.length > 0 && (
-								<div className="info-block tools-block">
+								<div className={`${styles["info-block"]} ${styles["tools-block"]}`}>
 									<h3>Software Used</h3>
-									<div className="tools-list">
+									<div className={styles["tools-list"]}>
 										{tools.map((tool, index) => (
 											<ToolIcon key={index} name={tool} />
 										))}

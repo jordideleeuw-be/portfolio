@@ -2,12 +2,19 @@
 import { getImage } from 'astro:assets';
 import MagazineViewer from './MagazineViewer.jsx';
 import SplitLayout from './SplitLayout.jsx';
+import styles from './Magazine.module.css';
 
 import magazineCover from '../assets/images/magazine-cover.png';
 import magazineSpread1 from '../assets/images/magazine-spread1.png';
 import magazineSpread2 from '../assets/images/magazine-spread2.png';
 import magazineSpread3 from '../assets/images/magazine-spread3.png';
 import magazineBackcover from '../assets/images/magazine-backcover.png';
+import magazinePage1 from '../assets/images/page1.png';
+import magazinePage2 from '../assets/images/page2.png';
+import magazinePage3 from '../assets/images/page3.png';
+import magazinePage4 from '../assets/images/page4.png';
+import magazinePage5 from '../assets/images/page5.png';
+import magazinePage6 from '../assets/images/page6.png';
 
 // Native resolution: cover/backcover (portrait) are 5103x7158; the three
 // spreads (landscape) are 10063x7158. Orientation is known statically per
@@ -18,6 +25,23 @@ const rawSpreads = [
   { id: 3, src: magazineSpread2, caption: 'Spread 02 — Visual Essay', orientation: 'landscape' },
   { id: 4, src: magazineSpread3, caption: 'Spread 03 — Typography', orientation: 'landscape' },
   { id: 5, src: magazineBackcover, caption: 'Backcover', orientation: 'portrait' },
+];
+
+// Mobile-only: individual single pages (5032x7158, same portrait shape as
+// cover/backcover) instead of the desktop two-page spreads — a landscape
+// spread crammed into a narrow phone screen reads far worse than just
+// showing one page at a time. Every item here is portrait, so they all
+// share the same frame (see mobileFramePaddingTopPercent below) with no
+// letterboxing worth mentioning between them.
+const rawMobileSpreads = [
+  { id: 1, src: magazineCover, caption: 'Cover', orientation: 'portrait' },
+  { id: 2, src: magazinePage1, caption: 'Page 1', orientation: 'portrait' },
+  { id: 3, src: magazinePage2, caption: 'Page 2', orientation: 'portrait' },
+  { id: 4, src: magazinePage3, caption: 'Page 3', orientation: 'portrait' },
+  { id: 5, src: magazinePage4, caption: 'Page 4', orientation: 'portrait' },
+  { id: 6, src: magazinePage5, caption: 'Page 5', orientation: 'portrait' },
+  { id: 7, src: magazinePage6, caption: 'Page 6', orientation: 'portrait' },
+  { id: 8, src: magazineBackcover, caption: 'Backcover', orientation: 'portrait' },
 ];
 
 // Two-stage load, same pattern as FinalWork's showcase image: a solid,
@@ -39,24 +63,29 @@ const FULL_WIDTHS = {
   landscape: [1200, 1600, 2000, 2600, 3200, 4000],
 };
 
-const spreads = await Promise.all(
-  rawSpreads.map(async ({ id, src, caption, orientation }) => {
-    const stage1 = await getImage({ src, width: STAGE1_WIDTH[orientation], format: 'webp' });
-    const fullVariants = await Promise.all(
-      FULL_WIDTHS[orientation].map((width) => getImage({ src, width, format: 'webp' }))
-    );
-    const fullSrcSet = fullVariants.map((v) => `${v.src} ${v.attributes.width}w`).join(', ');
-    return {
-      id,
-      caption,
-      orientation,
-      stage1Src: stage1.src,
-      stage1Width: stage1.attributes.width,
-      stage1Height: stage1.attributes.height,
-      fullSrcSet,
-    };
-  })
-);
+async function buildSpreads(rawItems) {
+  return Promise.all(
+    rawItems.map(async ({ id, src, caption, orientation }) => {
+      const stage1 = await getImage({ src, width: STAGE1_WIDTH[orientation], format: 'webp' });
+      const fullVariants = await Promise.all(
+        FULL_WIDTHS[orientation].map((width) => getImage({ src, width, format: 'webp' }))
+      );
+      const fullSrcSet = fullVariants.map((v) => `${v.src} ${v.attributes.width}w`).join(', ');
+      return {
+        id,
+        caption,
+        orientation,
+        stage1Src: stage1.src,
+        stage1Width: stage1.attributes.width,
+        stage1Height: stage1.attributes.height,
+        fullSrcSet,
+      };
+    })
+  );
+}
+
+const spreads = await buildSpreads(rawSpreads);
+const mobileSpreads = await buildSpreads(rawMobileSpreads);
 
 // Every page shares this one frame ratio (the landscape spreads' native
 // 10063x7158) so the viewer never changes height when you navigate between
@@ -67,218 +96,34 @@ const spreads = await Promise.all(
 // property — see the comment on .spread-frame for why.
 const frameAspectRatio = 10063 / 7158;
 const framePaddingTopPercent = (1 / frameAspectRatio) * 100;
+
+// Mobile frame ratio is the cover's own native ratio (5103x7158) instead —
+// every mobile item is portrait and near-identical in shape (pages are
+// 5032x7158, cover/backcover 5103x7158), so cover/backcover render at
+// exactly full width with zero letterbox, and pages sit at ~98.6% of that
+// width — visually indistinguishable from full width, without needing a
+// separate per-item aspect ratio.
+const mobileFrameAspectRatio = 5103 / 7158;
+const mobileFramePaddingTopPercent = (1 / mobileFrameAspectRatio) * 100;
 ---
 
-<section class="screen magazine">
+<section class={styles.screen}>
   <SplitLayout
     client:load
     title="Personal Magazine"
     description="Voor het vak Design 3 ontwierp ik een editorial magazine van acht pagina's dat functioneert als een visuele weerspiegeling van mijn identiteit en interesses. Als fundament bestudeerde ik de lay-outs, strakke grids en typografie van high-end modebladen zoals Vogue. Om dit klassieke stramien te doorbreken en er mijn eigen visuele handtekening aan te geven, heb ik de fotografie intensief bewerkt met experimentele Photoshop-technieken, waaronder duotone- en wave-effecten. Het resultaat is een dynamische publicatie waarin redactioneel ontwerp, complexe beeldbewerking en typografie samenkomen. Dit project illustreert hoe ik traditionele editorial conventies kan combineren met een persoonlijke, gedurfde esthetiek tot één kloppend visueel geheel."
     tools={["InDesign", "Photoshop", "Lightroom"]}
   >
-    <div slot="leftContent" class="content-wrapper">
-      <!-- De Viewer laadt hier live in -->
-      <MagazineViewer client:load spreads={spreads} framePaddingTopPercent={framePaddingTopPercent} />
+    <div slot="leftContent" class={styles['content-wrapper']}>
+      <!-- Desktop: two-page spreads. CSS shows/hides based on viewport —
+           client:media below also skips hydrating the mobile viewer's JS
+           entirely until that media query actually matches. -->
+      <div class={styles['desktop-viewer']}>
+        <MagazineViewer client:load spreads={spreads} framePaddingTopPercent={framePaddingTopPercent} />
+      </div>
+      <div class={styles['mobile-viewer']}>
+        <MagazineViewer client:media="(max-width: 768px)" spreads={mobileSpreads} framePaddingTopPercent={mobileFramePaddingTopPercent} initialIndex={0} />
+      </div>
     </div>
   </SplitLayout>
 </section>
-
-<style is:global>
-  /* GLOBAL STYLES VOOR DE REACT VIEWER (Omdat het in React zit, werkt is:global hier het best) */
-  .magazine-container {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  /* Ratio comes from an inline padding-top percentage (paddingTopPercent,
-     matched to the landscape spreads) instead of the `aspect-ratio`
-     property — the classic padding-hack technique, since `aspect-ratio`
-     doesn't reliably recompute in every browser when this box's width
-     changes via the info-panel's CSS Grid transition. Every page — portrait
-     or landscape — sizes to the exact same frame height at a given column
-     width; landscape spreads fill it edge-to-edge, portrait cover/backcover
-     render centered and letterboxed inside it via object-fit on the image. */
-  .spread-frame {
-    width: 100%;
-    height: 0;
-    position: relative;
-    background-color: #ffffff;
-  }
-
-  /* Cover/backcover stay off white on purpose — fully transparent so the
-     screen's own background shows through with no grey tint, letterboxed
-     around them instead of the white used for the spreads (which fill the
-     frame edge-to-edge anyway). */
-  .spread-frame--portrait {
-    background-color: transparent;
-  }
-
-  /* Abs-positioned to match the classic padding-top hack on .spread-frame
-     (spans its full padding box), then flex-centers .spread-photo so
-     portrait cover/backcover letterbox correctly inside the frame's shared
-     landscape shape instead of stretching to fill it. */
-  .spread-content {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Locked to the IMAGE's own native ratio (not the frame's), capped by
-     max-width/height so it shrink-to-fits exactly like object-fit: contain
-     did — but as a real box, so the border hugs the actual visible photo
-     instead of ringing the invisible full-frame rectangle (which is what
-     happened when the border lived on .spread-image itself: cover/backcover
-     are portrait, so their box == the wide landscape frame, way bigger than
-     the letterboxed photo inside it). */
-  .spread-photo {
-    position: relative;
-    /* Height is the definite dimension (100% of the flex-centered parent);
-       width is derived from it via aspect-ratio. Needs to be explicit —
-       .spread-image inside is position:absolute, so it contributes no
-       intrinsic size for .spread-photo to auto-size against on its own. */
-    height: 100%;
-    width: auto;
-    max-width: 100%;
-    border: var(--image-border-width) solid #000000;
-  }
-
-  /* Native pixel dimensions: cover/backcover 5103x7158, spreads 10063x7158
-     (same source as frameAspectRatio in Magazine.astro's frontmatter). */
-  .spread-photo--portrait {
-    aspect-ratio: 5103 / 7158;
-  }
-
-  .spread-photo--landscape {
-    aspect-ratio: 10063 / 7158;
-  }
-
-  .spread-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* .spread-photo already matches the image's exact ratio, so this just fills it */
-    display: block;
-  }
-
-  /* Two-stage load: stage 1 (the base .spread-image) renders immediately
-     and stays visible; stage 2 (this) sits on top at the same position and
-     only fades in once its own full-res srcset has actually loaded. */
-  .spread-image--full {
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-  }
-
-  .spread-image--full.loaded {
-    opacity: 1;
-  }
-
-  /* Knoppen styling — a real 12-column slice of the site grid (same
-     var(--grid-gutter) as .grid-overlay/.hero-grid), not a centered
-     max-width:600px flex row, so the buttons can be pinned to exact
-     column lines instead of just centered under the frame. */
-  .magazine-nav {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: var(--grid-gutter);
-    align-items: center;
-    width: 100%;
-  }
-
-  /* Right edge lines up with column 4's right edge. */
-  .nav-btn--prev {
-    grid-column: 4;
-    justify-self: end;
-  }
-
-  /* Left edge lines up with column 8's left edge. */
-  .nav-btn--next {
-    grid-column: 9;
-    justify-self: start;
-  }
-
-  .nav-btn {
-    background: none;
-    border: none;
-    /* No padding: the button's own box is pinned flush to the grid column
-       line (see .nav-btn--prev/--next below), so any padding here would
-       inset the icon away from that line instead of sitting flush on it. */
-    padding: 0;
-    /* Half of one 12-column grid-column's width — cqi-based (not a fixed
-       rem), against .project-media's inline-size in Layout.astro (the same
-       container the image borders use, and the exact width the 12-column
-       math runs against). One column = (100cqi total, minus 11 gutters) /
-       12; halved = /24. Explicit (not content-derived) because the
-       container-type below applies size containment, which strips a box's
-       own ability to auto-size from its content — an auto/content-hugging
-       width would collapse to 0 instead of fitting the icon.
-       clamp()'d for the same reason the hero contact/lang buttons needed a
-       cap: cqi tied to a near-full-page-width container scales forever on
-       very wide screens without one. */
-    width: clamp(3rem, calc((100cqi - 11 * var(--grid-gutter)) / 24), 5.5rem);
-    height: clamp(3rem, calc((100cqi - 11 * var(--grid-gutter)) / 24), 5.5rem);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: opacity 0.2s ease;
-    /* Establishes the cqi context for .nav-arrow-icon and
-       .nav-arrow-icon--disabled's outline width below — scoped to this
-       small local button box (not the full 12-column .magazine-nav above),
-       so it can't balloon the way the hero buttons did against a
-       full-width container. */
-    container-type: inline-size;
-  }
-
-  .nav-btn:hover:not(:disabled) {
-    opacity: 0.6;
-  }
-
-  .nav-btn:disabled {
-    cursor: not-allowed;
-  }
-
-  .nav-arrow-icon {
-    /* 100cqi (not 90) — fills the button's box exactly so the arrow's own
-       edges sit flush with it, and therefore flush with the grid column
-       line the button is pinned to. */
-    width: 100cqi;
-    height: auto;
-    display: block;
-    fill: #000000;
-  }
-
-  /* Disabled state: hollow instead of dimmed — white fill, black outline. */
-  .nav-arrow-icon--disabled {
-    fill: #ffffff;
-    stroke: #000000;
-    stroke-width: var(--arrow-outline-width);
-    stroke-linejoin: round;
-  }
-
-  .nav-btn--prev .nav-arrow-icon {
-    transform: rotate(180deg);
-  }
-</style>
-
-<style>
-  /* De basis sectie */
-  .screen {
-    width: 100%;
-    min-height: 100vh;
-    background-color: #fff; /* Je achtergrondkleur */
-  }
-
-  .content-wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-</style>

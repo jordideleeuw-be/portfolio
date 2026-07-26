@@ -1,0 +1,200 @@
+.magazine-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Ratio comes from an inline padding-top percentage (paddingTopPercent,
+   matched to the landscape spreads) instead of the `aspect-ratio`
+   property — the classic padding-hack technique, since `aspect-ratio`
+   doesn't reliably recompute in every browser when this box's width
+   changes via the info-panel's CSS Grid transition. Every page — portrait
+   or landscape — sizes to the exact same frame height at a given column
+   width; landscape spreads fill it edge-to-edge, portrait cover/backcover
+   render centered and letterboxed inside it via object-fit on the image. */
+.spread-frame {
+  width: 100%;
+  height: 0;
+  position: relative;
+  background-color: #ffffff;
+}
+
+/* Cover/backcover stay off white on purpose — fully transparent so the
+   screen's own background shows through with no grey tint, letterboxed
+   around them instead of the white used for the spreads (which fill the
+   frame edge-to-edge anyway). */
+.spread-frame--portrait {
+  background-color: transparent;
+}
+
+/* Abs-positioned to match the classic padding-top hack on .spread-frame
+   (spans its full padding box), then flex-centers .spread-photo so
+   portrait cover/backcover letterbox correctly inside the frame's shared
+   landscape shape instead of stretching to fill it. */
+.spread-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Locked to the IMAGE's own native ratio (not the frame's), capped by
+   max-width/height so it shrink-to-fits exactly like object-fit: contain
+   did — but as a real box, so the border hugs the actual visible photo
+   instead of ringing the invisible full-frame rectangle (which is what
+   happened when the border lived on .spread-image itself: cover/backcover
+   are portrait, so their box == the wide landscape frame, way bigger than
+   the letterboxed photo inside it). */
+.spread-photo {
+  position: relative;
+  /* Height is the definite dimension (100% of the flex-centered parent);
+     width is derived from it via aspect-ratio. Needs to be explicit —
+     .spread-image inside is position:absolute, so it contributes no
+     intrinsic size for .spread-photo to auto-size against on its own. */
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  border: var(--image-border-width) solid #000000;
+}
+
+/* Native pixel dimensions: cover/backcover 5103x7158, spreads 10063x7158
+   (same source as frameAspectRatio in Magazine.astro's frontmatter). */
+.spread-photo--portrait {
+  aspect-ratio: 5103 / 7158;
+}
+
+.spread-photo--landscape {
+  aspect-ratio: 10063 / 7158;
+}
+
+.spread-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* .spread-photo already matches the image's exact ratio, so this just fills it */
+  display: block;
+}
+
+/* Two-stage load: stage 1 (the base .spread-image) renders immediately
+   and stays visible; stage 2 (this) sits on top at the same position and
+   only fades in once its own full-res srcset has actually loaded. */
+.spread-image--full {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.spread-image--full.loaded {
+  opacity: 1;
+}
+
+/* Knoppen styling — a real 12-column slice of the site grid (same
+   var(--grid-gutter) as .grid-overlay/.hero-grid), not a centered
+   max-width:600px flex row, so the buttons can be pinned to exact
+   column lines instead of just centered under the frame. */
+.magazine-nav {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  align-items: center;
+  width: 100%;
+}
+
+/* Right edge lines up with column 4's right edge. */
+.nav-btn--prev {
+  grid-column: 4;
+  justify-self: end;
+}
+
+/* Left edge lines up with column 8's left edge. */
+.nav-btn--next {
+  grid-column: 9;
+  justify-self: start;
+}
+
+/* Mobile: 4-column grid instead of 12, arrows pushed to the outer edges
+   of the row instead of clustering toward the middle — prev's own left
+   edge flush with column 1's left edge, next's own right edge flush with
+   column 4's right edge. */
+@media (max-width: 768px) {
+  .magazine-nav {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .nav-btn--prev {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .nav-btn--next {
+    grid-column: 4;
+    justify-self: end;
+  }
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  /* No padding: the button's own box is pinned flush to the grid column
+     line (see .nav-btn--prev/--next below), so any padding here would
+     inset the icon away from that line instead of sitting flush on it. */
+  padding: 0;
+  /* Half of one 12-column grid-column's width — cqi-based (not a fixed
+     rem), against .project-media's inline-size in Layout.astro (the same
+     container the image borders use, and the exact width the 12-column
+     math runs against). One column = (100cqi total, minus 11 gutters) /
+     12; halved = /24. Explicit (not content-derived) because the
+     container-type below applies size containment, which strips a box's
+     own ability to auto-size from its content — an auto/content-hugging
+     width would collapse to 0 instead of fitting the icon.
+     clamp()'d for the same reason the hero contact/lang buttons needed a
+     cap: cqi tied to a near-full-page-width container scales forever on
+     very wide screens without one. */
+  width: clamp(3rem, calc((100cqi - 11 * var(--grid-gutter)) / 24), 5.5rem);
+  height: clamp(3rem, calc((100cqi - 11 * var(--grid-gutter)) / 24), 5.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  /* Establishes the cqi context for .nav-arrow-icon and
+     .nav-arrow-icon--disabled's outline width below — scoped to this
+     small local button box (not the full 12-column .magazine-nav above),
+     so it can't balloon the way the hero buttons did against a
+     full-width container. */
+  container-type: inline-size;
+}
+
+.nav-btn:hover:not(:disabled) {
+  opacity: 0.6;
+}
+
+.nav-btn:disabled {
+  cursor: not-allowed;
+}
+
+.nav-arrow-icon {
+  /* 100cqi (not 90) — fills the button's box exactly so the arrow's own
+     edges sit flush with it, and therefore flush with the grid column
+     line the button is pinned to. */
+  width: 100cqi;
+  height: auto;
+  display: block;
+  fill: #000000;
+}
+
+/* Disabled state: hollow instead of dimmed — white fill, black outline. */
+.nav-arrow-icon--disabled {
+  fill: #ffffff;
+  stroke: #000000;
+  stroke-width: var(--arrow-outline-width);
+  stroke-linejoin: round;
+}
+
+.nav-btn--prev .nav-arrow-icon {
+  transform: rotate(180deg);
+}

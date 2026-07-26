@@ -3,6 +3,8 @@ import { Image, getImage } from 'astro:assets';
 import SplitLayout from './SplitLayout.jsx';
 import jidliInclusions from '../assets/images/JIDLI_INCLUSIONS.png';
 import showreelPosterSrc from '../assets/images/showreel-poster.jpg';
+import jidliEventSrc from '../assets/images/Jidli_event.png';
+import styles from './FinalWork.module.css';
 
 // A plain URL (not the <Image> component) since it's used as a native
 // <video poster> attribute, not rendered as its own <img>.
@@ -22,10 +24,16 @@ const showcaseFullVariants = await Promise.all(
   showcaseFullWidths.map((width) => getImage({ src: jidliInclusions, width, format: 'webp' }))
 );
 const showcaseFullSrcset = showcaseFullVariants.map((v) => `${v.src} ${v.attributes.width}w`).join(', ');
+
+// Same two-stage pattern as Internship's grid tiles (half resolution
+// first, then native), not the showcase image's big multi-tier srcset —
+// this is a small grid tile, not full-bleed hero content.
+const eventStage1 = await getImage({ src: jidliEventSrc, width: Math.round(jidliEventSrc.width / 2), format: 'webp' });
+const eventFull = await getImage({ src: jidliEventSrc, width: jidliEventSrc.width, format: 'webp' });
 ---
 
-<section class="screen final-work">
-  <SplitLayout 
+<section class={styles.screen}>
+  <SplitLayout
     client:load
     title="JIDLI — Hybrid Album"
     description={`Voor mijn eindwerk binnen de opleiding Multimedia & Creatieve Technologie onderzocht ik hoe de integratie van een interactief, fysiek object de K-pop albumervaring gelaagder en intenser kan maken. Om de volledige creatieve controle te hebben, ontwikkelde ik 'JIDLI': een fictieve K-pop groep compleet met een eigen visuele identiteit, karakters en songteksten voor het debuutalbum Unidentified Frivolous Object. Door deze wereld vanaf nul op te bouwen, kon ik de esthetiek en functionaliteit perfect afstemmen op mijn onderzoeksvraag.
@@ -34,69 +42,79 @@ Ieder groepslid heeft zo een eigen verhaallijn en muzieknummer gekregen. Door de
     tools={["InDesign", "Illustrator", "Photoshop", "After Effects", "Premiere Pro", "Figma", "Maya", "Google AI", "Suno", "Swift"]}
   >
     {/* ALLES WAT JE HIER TUSSEN ZET, KOMT AUTOMATISCH IN DE 9-KOLOMMEN LINKERKANT! */}
-    <div slot="leftContent" class="my-visuals">
-      <div class="showcase-wrapper">
+    <div slot="leftContent" class={styles['my-visuals']}>
+      <div class={styles['showcase-wrapper']}>
         <img
           src={showcaseStage1.src}
           alt="JIDLI — Hybrid Album showcase"
-          class="showcase-image"
+          class={styles['showcase-image']}
           id="showcase-stage1"
           width={showcaseStage1.attributes.width}
           height={showcaseStage1.attributes.height}
           loading="lazy"
         />
       </div>
-      <div class="placeholder-row">
+      <div class={styles['placeholder-row']}>
         {/* Native <video poster> + preload="none": the browser shows the
             poster on its own, and never requests the 13MB video file until
             .play() is called on click. No custom DOM creation or manual
             sizing — that's what was causing the black-frame rendering bug. */}
-        <div class="video-tile" id="showreel-tile">
-          <video id="showreel-video" class="video-poster" poster={showreelPoster.src} preload="none" playsinline>
+        <div class={styles['video-tile']} id="showreel-tile">
+          <video id="showreel-video" class={styles['video-poster']} poster={showreelPoster.src} preload="none" playsinline>
             <source src="/videos/jidli-showreel.mp4" type="video/mp4" />
           </video>
-          <button class="video-play-btn" id="showreel-play-btn" aria-label="Play showreel" type="button">
+          <button class={styles['video-play-btn']} id="showreel-play-btn" aria-label="Play showreel" type="button">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M8 5v14l11-7z" fill="currentColor" />
             </svg>
           </button>
         </div>
-        <div class="placeholder-box"><span class="placeholder-label">Add image</span></div>
-        <div class="placeholder-box"><span class="placeholder-label">Add image</span></div>
+        <div class={styles['placeholder-box']}>
+          <img
+            src={eventStage1.src}
+            width={eventStage1.attributes.width}
+            height={eventStage1.attributes.height}
+            alt="JIDLI event"
+            class={styles['tile-image']}
+            id="event-stage1"
+            data-full-src={eventFull.src}
+            loading="lazy"
+          />
+        </div>
+        <div class={styles['placeholder-box']}><span class={styles['placeholder-label']}>Add image</span></div>
       </div>
     </div>
   </SplitLayout>
 </section>
 
-<script define:vars={{ showcaseFullSrcset }}>
+<script define:vars={{
+  showcaseFullSrcset,
+  showcaseImageClass: styles['showcase-image'],
+  showcaseImageFullClass: styles['showcase-image--full'],
+  loadedClass: styles.loaded,
+}}>
   // Sequential two-stage upgrade: only start fetching the full-res
   // srcset once the fast 2600px stage-1 image has actually finished
   // loading, so the two never compete for bandwidth.
   const stage1 = document.getElementById('showcase-stage1');
-  const wrapper = stage1?.closest('.showcase-wrapper');
 
   function upgradeShowcaseToFullRes() {
-    if (!wrapper) return;
+    const showcaseWrapper = stage1.parentElement;
+    if (!showcaseWrapper) return;
     const stage2 = document.createElement('img');
     stage2.alt = '';
     stage2.setAttribute('aria-hidden', 'true');
-    stage2.className = 'showcase-image showcase-image--full';
+    // CSS Modules hashes class names into the imported `styles` object
+    // itself, so setting className with those hashed strings is enough to
+    // match the module's rules — unlike Astro's own scoped <style> (which
+    // needs a separate data-astro-cid-* attribute copied onto elements
+    // created here via JS), there's no extra step needed for an element
+    // that was never in the static template.
+    stage2.className = `${showcaseImageClass} ${showcaseImageFullClass}`;
     stage2.sizes = '(max-width: 900px) 100vw, 95vw';
     stage2.srcset = showcaseFullSrcset;
-    // Astro's scoped <style> below only tags elements present in the
-    // static template (via a data-astro-cid-* attribute added at compile
-    // time) — an element created here via JS never gets it, so the scoped
-    // .showcase-image--full rule (position:absolute, opacity, etc.) was
-    // silently not matching, and stage 2 rendered as a second plain image
-    // stacked below stage 1 instead of overlaying it. Copying the
-    // attribute from stage1 (which does have it) fixes that.
-    for (const attr of stage1.attributes) {
-      if (attr.name.startsWith('data-astro-cid')) {
-        stage2.setAttribute(attr.name, attr.value);
-      }
-    }
-    stage2.addEventListener('load', () => stage2.classList.add('loaded'), { once: true });
-    wrapper.appendChild(stage2);
+    stage2.addEventListener('load', () => stage2.classList.add(loadedClass), { once: true });
+    showcaseWrapper.appendChild(stage2);
   }
 
   if (stage1 instanceof HTMLImageElement) {
@@ -104,6 +122,37 @@ Ieder groepslid heeft zo een eigen verhaallijn en muzieknummer gekregen. Door de
       upgradeShowcaseToFullRes();
     } else {
       stage1.addEventListener('load', upgradeShowcaseToFullRes, { once: true });
+    }
+  }
+</script>
+
+<script define:vars={{
+  tileImageClass: styles['tile-image'],
+  tileImageFullClass: styles['tile-image--full'],
+  loadedClass: styles.loaded,
+}}>
+  // Same two-stage upgrade as the showcase image above, just for the
+  // JIDLI event tile — half-resolution stage 1 already in the static
+  // markup, swapped for the full-resolution version once it's loaded.
+  const eventStage1 = document.getElementById('event-stage1');
+
+  function upgradeEventToFullRes() {
+    const wrapper = eventStage1.parentElement;
+    if (!wrapper) return;
+    const stage2 = document.createElement('img');
+    stage2.src = eventStage1.dataset.fullSrc;
+    stage2.alt = '';
+    stage2.setAttribute('aria-hidden', 'true');
+    stage2.className = `${tileImageClass} ${tileImageFullClass}`;
+    stage2.addEventListener('load', () => stage2.classList.add(loadedClass), { once: true });
+    wrapper.appendChild(stage2);
+  }
+
+  if (eventStage1 instanceof HTMLImageElement) {
+    if (eventStage1.complete) {
+      upgradeEventToFullRes();
+    } else {
+      eventStage1.addEventListener('load', upgradeEventToFullRes, { once: true });
     }
   }
 </script>
@@ -119,148 +168,3 @@ Ieder groepslid heeft zo een eigen verhaallijn en muzieknummer gekregen. Door de
     video.play();
   });
 </script>
-
-<style>
-  .screen {
-    width: 100%;
-    min-height: 100vh;
-    background-color: #fff;
-  }
-
-  .my-visuals {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: var(--grid-margin);
-  }
-
-  /* Two-stage load, both genuinely sharp — no blur trick. Stage 1 (2600px)
-     is a normal in-flow image, so it establishes the wrapper's real height
-     via its own width:100%/height:auto aspect ratio. Stage 2 (full-res,
-     injected by the script below once stage 1 finishes) sits absolutely
-     on top of that same box and crossfades in once it's loaded, then
-     visually replaces stage 1 — no layout shift either way. */
-  .showcase-wrapper {
-    position: relative;
-    width: 100%;
-    border: var(--image-border-width) solid #000000;
-  }
-
-  .showcase-image {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  .showcase-image--full {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .showcase-image--full.loaded {
-    opacity: 1;
-  }
-
-  /* Same 4:3 padding-top box as .placeholder-box, but holding the poster
-     image (then the video once clicked) instead of a placeholder label. */
-  .video-tile {
-    width: 100%;
-    height: 0;
-    padding-top: 75%;
-    position: relative;
-    background-color: #000000;
-    overflow: hidden;
-    cursor: pointer;
-    border: var(--image-border-width) solid #000000;
-  }
-
-  .video-poster {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .video-play-btn {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 3.25rem;
-    height: 3.25rem;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.92);
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-  }
-
-  .video-play-btn:hover {
-    transform: translate(-50%, -50%) scale(1.08);
-    background-color: #ffffff;
-  }
-
-  .video-play-btn svg {
-    width: 1.25rem;
-    height: 1.25rem;
-    margin-left: 3px; /* optical centering for the play triangle */
-    color: #000000;
-  }
-
-  /* Real 4-column-span slice of the site's 12-column grid (var(--grid-gutter),
-     same as .grid-overlay/.hero-grid) instead of an independent repeat(3, 1fr)
-     with a flat 1rem gap — that local grid only coincidentally lined up with
-     the real grid at some viewport widths and drifted at others. */
-  .placeholder-row {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: var(--grid-gutter);
-    row-gap: var(--grid-gutter);
-  }
-
-  .placeholder-row > * {
-    grid-column: span 4;
-  }
-
-  /* 4:3 ratio via the padding-top percentage hack (not the `aspect-ratio`
-     property) — this sits inside SplitLayout's animated info-panel grid,
-     and aspect-ratio doesn't reliably recompute across that transition. */
-  .placeholder-box {
-    width: 100%;
-    height: 0;
-    padding-top: 75%;
-    position: relative;
-    background-color: rgba(0, 0, 0, 0.15);
-    border: var(--image-border-width) solid #000000;
-  }
-
-  .placeholder-label {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    font-family: system-ui, -apple-system, sans-serif;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(0, 0, 0, 0.55);
-  }
-</style>

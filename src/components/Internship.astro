@@ -2,6 +2,7 @@
 // Internship.astro
 import { getImage } from 'astro:assets';
 import SplitLayout from './SplitLayout.jsx';
+import styles from './Internship.module.css';
 
 import img01 from '../assets/images/01_instapost.png';
 import img02 from '../assets/images/02_schutbladen.png';
@@ -55,7 +56,7 @@ const videoTiles = [
 // filenames' own numbering.
 const items = [...imageTiles, ...videoTiles];
 ---
-<section class="screen internship">
+<section class={styles.screen}>
   <SplitLayout
     client:load
     title="Internship"
@@ -67,26 +68,26 @@ Deze hands-on ervaring zorgde voor een enorme groeispurt in mijn technische vaar
     liveLabel="ontdek hun portfoliowebsite die ik mee ontwierp"
     liveButtonText="bezoek haar"
   >
-    <div slot="leftContent" class="left-content">
+    <div slot="leftContent" class={styles['left-content']}>
       {/* 12 tiles, 3 columns x 4 rows, all 4:3 — 10 photos then 2 videos. */}
-      <div class="tile-grid">
+      <div class={styles['tile-grid']}>
         {items.map((item) => (
           item.type === 'image' ? (
-            <div class="tile">
+            <div class={styles.tile}>
               <img
                 src={item.stage1Src}
                 width={item.stage1Width}
                 height={item.stage1Height}
                 alt=""
-                class="tile-image"
+                class={styles['tile-image']}
                 data-full-src={item.fullSrc}
                 loading="lazy"
               />
             </div>
           ) : (
-            <div class="tile video-tile">
+            <div class={`${styles.tile} ${styles['video-tile']}`}>
               <video
-                class="tile-video"
+                class={styles['tile-video']}
                 data-autoplay-video
                 poster={item.poster}
                 preload="none"
@@ -97,7 +98,7 @@ Deze hands-on ervaring zorgde voor een enorme groeispurt in mijn technische vaar
               >
                 <source src={item.src} type="video/mp4" />
               </video>
-              <button class="tile-fullscreen-btn" data-fullscreen-btn aria-label={`View ${item.label} video fullscreen`} type="button">
+              <button class={styles['tile-fullscreen-btn']} data-fullscreen-btn aria-label={`View ${item.label} video fullscreen`} type="button">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" fill="currentColor" />
                 </svg>
@@ -110,16 +111,21 @@ Deze hands-on ervaring zorgde voor een enorme groeispurt in mijn technische vaar
   </SplitLayout>
 </section>
 
-<script>
+<script define:vars={{
+  tileClass: styles.tile,
+  tileImageClass: styles['tile-image'],
+  tileImageFullClass: styles['tile-image--full'],
+  loadedClass: styles.loaded,
+}}>
   // Sequential two-stage upgrade for every tile image on this page: only
   // start fetching the full-res version once that tile's own fast stage-1
   // image has actually finished loading, so requests never compete with
   // each other for bandwidth.
-  const stage1Images = document.querySelectorAll('.tile-image[data-full-src]');
+  const stage1Images = document.querySelectorAll(`.${tileImageClass}[data-full-src]`);
 
   stage1Images.forEach((stage1) => {
     if (!(stage1 instanceof HTMLImageElement)) return;
-    const wrapper = stage1.closest('.tile');
+    const wrapper = stage1.closest(`.${tileClass}`);
     const fullSrc = stage1.dataset.fullSrc;
     if (!wrapper || !fullSrc) return;
 
@@ -128,17 +134,13 @@ Deze hands-on ervaring zorgde voor een enorme groeispurt in mijn technische vaar
       stage2.src = fullSrc;
       stage2.alt = '';
       stage2.setAttribute('aria-hidden', 'true');
-      stage2.className = 'tile-image tile-image--full';
-      // Astro's scoped <style> below only tags elements present in the
-      // static template — an element created here via JS never gets that
-      // attribute, so copy it from stage1 (see the identical fix on
-      // FinalWork's showcase image for why this matters).
-      for (const attr of stage1.attributes) {
-        if (attr.name.startsWith('data-astro-cid')) {
-          stage2.setAttribute(attr.name, attr.value);
-        }
-      }
-      stage2.addEventListener('load', () => stage2.classList.add('loaded'), { once: true });
+      // CSS Modules hashes class names into the imported `styles` object
+      // itself, so setting className with those hashed strings is enough
+      // to match — no data-astro-cid copying needed for elements created
+      // here via JS (that was only a concern with Astro's own scoped
+      // <style>, which this component no longer uses).
+      stage2.className = `${tileImageClass} ${tileImageFullClass}`;
+      stage2.addEventListener('load', () => stage2.classList.add(loadedClass), { once: true });
       wrapper.appendChild(stage2);
     }
 
@@ -176,15 +178,18 @@ Deze hands-on ervaring zorgde voor een enorme groeispurt in mijn technische vaar
   videos.forEach((video) => observer.observe(video));
 </script>
 
-<script>
+<script define:vars={{
+  videoTileClass: styles['video-tile'],
+  tileVideoClass: styles['tile-video'],
+}}>
   // Click-to-fullscreen: the loop itself stays muted/autoplaying, but this
   // opens the same <video> in the browser's native fullscreen view with
   // sound and controls, then reverts back to a silent looping preview on
   // exit. iOS Safari has no generic Fullscreen API for arbitrary elements,
   // only a video-specific one (webkitEnterFullscreen), so that's handled
   // as a separate path.
-  document.querySelectorAll('.video-tile').forEach((tile) => {
-    const video = tile.querySelector('.tile-video');
+  document.querySelectorAll(`.${videoTileClass}`).forEach((tile) => {
+    const video = tile.querySelector(`.${tileVideoClass}`);
     const btn = tile.querySelector('[data-fullscreen-btn]');
     if (!(video instanceof HTMLVideoElement) || !btn) return;
 
@@ -206,125 +211,3 @@ Deze hands-on ervaring zorgde voor een enorme groeispurt in mijn technische vaar
     });
   });
 </script>
-
-<style>
-  .screen {
-    width: 100%;
-    min-height: 100vh;
-    background-color: #fff;
-  }
-
-  .left-content {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  /* Real 4-column-span slice of the site's 12-column grid (var(--grid-gutter),
-     same as .grid-overlay/.hero-grid) instead of an independent repeat(3, 1fr)
-     with a flat 1rem gap — that local grid only coincidentally lined up with
-     the real grid at some viewport widths and drifted at others. */
-  .tile-grid {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: var(--grid-gutter);
-    row-gap: var(--grid-gutter);
-  }
-
-  .tile-grid > .tile {
-    grid-column: span 4;
-  }
-
-  /* 4:3 via the padding-top percentage hack (not the `aspect-ratio`
-     property) — this sits inside SplitLayout's animated info-panel grid,
-     which aspect-ratio doesn't reliably survive. */
-  .tile {
-    width: 100%;
-    height: 0;
-    padding-top: 75%;
-    position: relative;
-    background-color: rgba(0, 0, 0, 0.15);
-    border: var(--image-border-width) solid #000000;
-    overflow: hidden;
-  }
-
-  /* Source photos are ~1554x1251 (one at 3680x2760), not an exact 4:3 —
-     object-fit: cover fills the tile edge-to-edge with a small crop rather
-     than letterboxing, which reads better in a dense photo grid like this
-     one (unlike the magazine spreads, these tiles don't need to preserve
-     the full, uncropped frame). */
-  .tile-image {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  /* Two-stage load: stage 1 renders immediately and stays visible; stage 2
-     (injected by the script above once stage 1 finishes) sits on top at
-     the same position and fades in once its own full-res file has loaded. */
-  .tile-image--full {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .tile-image--full.loaded {
-    opacity: 1;
-  }
-
-  .tile-video {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  /* Hidden until hovered so it doesn't compete with the autoplay loop
-     visually — always shown on touch devices, which have no hover state
-     to reveal it with. */
-  .tile-fullscreen-btn {
-    position: absolute;
-    bottom: 0.6rem;
-    right: 0.6rem;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.85);
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
-    z-index: 2;
-  }
-
-  .video-tile:hover .tile-fullscreen-btn,
-  .tile-fullscreen-btn:focus-visible {
-    opacity: 1;
-  }
-
-  .tile-fullscreen-btn:hover {
-    background-color: #ffffff;
-    transform: scale(1.08);
-  }
-
-  .tile-fullscreen-btn svg {
-    width: 1.1rem;
-    height: 1.1rem;
-    color: #000000;
-  }
-
-  @media (hover: none) {
-    .tile-fullscreen-btn {
-      opacity: 1;
-    }
-  }
-</style>

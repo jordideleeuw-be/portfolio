@@ -2,47 +2,28 @@
 // Hero.astro — Above The Fold (TRUE FULL-BLEED CQI GRID LOCK)
 import { Image } from 'astro:assets';
 import headshot from '../assets/images/headshot.png';
+import styles from './Hero.module.css';
 ---
 
-<section class="screen hero-section">
-  <div class="hero-grid">
+<section class={styles['hero-section']}>
+  <div class={styles['hero-grid']}>
 
     <!-- 1. TITEL LINKSBOVEN (4 kolommen breed) -->
-    <div class="hero-title">
-      <img src="/images/logo.svg" alt="Jordi De Leeuw" class="hero-logo-svg" />
+    <div class={styles['hero-title']}>
+      <img src="/images/logo.svg" alt="Jordi De Leeuw" class={styles['hero-logo-svg']} />
     </div>
 
-    <!-- 2. CONTACT & TAAL RECHTSBOVEN (Kolom 11 en 12) -->
-    <div class="hero-top-right">
-      <a href="mailto:deleeuwjordi@gmail.com" class="btn-contact">KOM IN CONTACT</a>
-
-      <details class="lang-dropdown">
-        <summary class="btn-lang">NL</summary>
-        <div class="lang-menu">
-          <a href="?lang=nl" class="lang-option active">NL</a>
-          <a href="?lang=en" class="lang-option">EN</a>
-        </div>
-      </details>
+    <!-- 2. CONTACT RECHTSBOVEN (Kolom 11 en 12) -->
+    <div class={styles['hero-top-right']}>
+      <a href="mailto:deleeuwjordi@gmail.com" class={styles['btn-contact']}>KOM IN CONTACT</a>
     </div>
-
-    <!-- 3. FIRST LOOK MIDDEN (Kolom 3 tot 7 = 4 kolommen) — temporarily removed, uncomment to restore
-    <div class="hero-intro">
-      <div class="intro-header">
-        <h2>FIRST LOOK</h2>
-        <img src="/images/line.svg" alt="" class="scratch-line-svg" />
-      </div>
-      <p>
-        Visuele allrounder met een voorliefde voor stevig contrast, mixed media en digitale precisie. Sterke concepten vertaald naar elk medium.
-      </p>
-    </div>
-    -->
 
     <!-- 4. FOTO RECHTS (Kolom 8 tot 13 = 5 kolommen) -->
-    <div class="hero-photo-container">
+    <div class={styles['hero-photo-container']}>
       <Image
         src={headshot}
         alt="Jordi De Leeuw"
-        class="hero-photo"
+        class={styles['hero-photo']}
         widths={[400, 800, 1200, 1600, 1958]}
         sizes="(max-width: 768px) 100vw, 50vw"
         format="webp"
@@ -52,285 +33,9 @@ import headshot from '../assets/images/headshot.png';
     </div>
 
     <!-- 5. DESIGN PORTFOLIO ONDERAAN (6 kolommen breed) -->
-    <div class="hero-footer-title">
-      <h1><span class="outline-text">DESIGN</span> PORTFOLIO</h1>
+    <div class={styles['hero-footer-title']}>
+      <h1><span class={styles['outline-text']}>DESIGN</span> PORTFOLIO</h1>
     </div>
 
   </div>
 </section>
-
-<!-- <div class="hero-divider"></div> -->
-
-<style>
-  .hero-divider {
-    width: 100%;
-    height: 0.2cqi;
-    margin: 0;
-    padding: 0;
-    background-color: #000000;
-    display: block;
-  }
-
-  .hero-section {
-    width: 100%;
-    height: 100vh;
-    background-color: #ffffff;
-    color: #000000;
-    position: relative;
-    overflow: hidden;
-  }
-
-  /* =========================================================
-     🔥 THE FIX: NO MAX-WIDTH, NO MARGIN AUTO
-     ---------------------------------------------------------
-     This is the ONLY structural change from your original file.
-     Because this element has `container-type: inline-size`, its
-     inline-size is what every `cqi` value below is measured
-     against. With the 1600px cap gone, that inline-size == 100vw
-     minus the scrollbar at every viewport — from a 1512px MacBook
-     to a 5120px 5K display — so every cqi-based font-size, height,
-     and gap keeps scaling in exact linear proportion, forever.
-     Because .grid-overlay in Layout.astro uses the identical
-     --grid-gutter / --grid-margin values with no cap either, the
-     debug grid and this content grid stay pixel-locked at any size.
-     ========================================================= */
-  .hero-grid {
-    display: grid;
-    grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
-    column-gap: var(--grid-gutter);
-    padding: var(--grid-margin);
-    width: 100%;
-    box-sizing: border-box;
-    height: 100%;
-    grid-template-rows: auto 1fr auto;
-    container-type: inline-size;
-  }
-
-  /* =========================================================
-     🎯 WISKUNDIG EXACTE SCHALING (cqi) — NU ZONDER PLAFOND
-     ========================================================= */
-
-  /* 1. TITEL LINKSBOVEN */
-  .hero-title {
-    grid-column: 1 / span 4;
-    grid-row: 1;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    width: 100%;
-  }
-
-  .hero-logo-svg {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  /* 2. CONTACT & TAAL RECHTSBOVEN (Kolom 11 en 12) */
-  .hero-top-right {
-    grid-column: 11 / span 2;
-    grid-row: 1;
-    display: flex;
-    justify-content: space-between;
-    gap: var(--grid-gutter);
-    align-items: flex-start;
-    width: 100%;
-    z-index: 50;
-  }
-
-  /* Outline style, matching .read-more-btn in Layout.astro. */
-  .btn-contact {
-    background-color: transparent;
-    border: 2px solid #000000;
-    color: #000000;
-    text-decoration: none;
-    font-size: clamp(0.7rem, 0.85cqi, 0.95rem);
-    font-weight: 600;
-    height: 2.5cqi;
-    min-height: 36px;
-    max-height: 44px;
-    padding: 0 1cqi;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    letter-spacing: 0.05em;
-    white-space: nowrap;
-    transition: background-color 0.2s ease, color 0.2s ease;
-  }
-
-  .btn-contact:hover {
-    background-color: #000000;
-    color: #ffffff;
-  }
-
-  .lang-dropdown {
-    position: relative;
-    height: 2.5cqi;
-    min-height: 36px;
-    max-height: 44px;
-  }
-
-  .btn-lang {
-    width: 2.5cqi;
-    min-width: 36px;
-    max-width: 44px;
-    height: 100%;
-    background-color: #000000;
-    color: #ffffff;
-    border: none;
-    font-size: clamp(0.7rem, 0.85cqi, 0.95rem);
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    list-style: none;
-    user-select: none;
-    transition: background-color 0.2s ease;
-  }
-
-  .btn-lang:hover,
-  .lang-dropdown[open] .btn-lang {
-    background-color: #333333;
-  }
-
-  .btn-lang::-webkit-details-marker {
-    display: none;
-  }
-
-  .lang-menu {
-    position: absolute;
-    top: calc(100% + 4px);
-    right: 0;
-    width: 100%;
-    background-color: #000000;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-  }
-
-  .lang-option {
-    color: #888888;
-    text-decoration: none;
-    font-size: 0.85cqi;
-    font-weight: 800;
-    padding: 0.6cqi 0;
-    text-align: center;
-    transition: all 0.2s;
-  }
-
-  .lang-option:hover,
-  .lang-option.active {
-    color: #ffffff;
-    background-color: #222222;
-  }
-
-  /* 3. FIRST LOOK MIDDEN (Kolom 3 tot 7 = 4 kolommen) */
-  .hero-intro {
-    grid-column: 4 / span 3;
-    grid-row: 2;
-    align-self: flex-start;
-    margin-top: 5cqi;
-    z-index: 10;
-  }
-
-  .intro-header {
-    position: relative;
-    margin-bottom: 0.8cqi;
-    width: 100%;
-  }
-
-  .intro-header h2 {
-    /* Calibrated to fill exactly columns 3–4. This ratio is
-       container-relative, so it holds at every screen size now
-       that the container itself is uncapped. */
-    font-size: 2.8cqi;
-    font-weight: 900;
-    margin: 0;
-    line-height: 0.9;
-    position: relative;
-    z-index: 1;
-    white-space: nowrap;
-  }
-
-  .scratch-line-svg {
-    display: block;
-    width: 95%;
-    height: auto;
-    margin-top: -0.8cqi;
-    margin-bottom: -0.6cqi;
-    position: relative;
-    z-index: 2;
-    pointer-events: none;
-  }
-
-  .hero-intro p {
-    /* Calibrated so the copy wraps to exactly 3 lines across 4
-       columns. Because font-size and column width share the same
-       cqi base, the character-per-line count stays constant at
-       every viewport — this is the actual reason cqi (not vw or
-       rem) is the right unit for this constraint. */
-    font-size: 1.1cqi;
-    line-height: 1.5;
-    font-weight: 500;
-    text-transform: none;
-    color: #1a1a1a;
-    margin-top: 0;
-  }
-
-  /* 4. FOTO RECHTS */
-  .hero-photo-container {
-    grid-column: 8 / span 5;
-    grid-row: 1 / span 3;
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    justify-content: flex-end;
-    margin-right: calc(-1 * var(--grid-margin));
-    margin-bottom: calc(-1 * var(--grid-margin));
-    pointer-events: none;
-  }
-
-  .hero-photo {
-    width: 100%;
-    height: 100%;
-    max-height: 100vh;
-    object-fit: contain;
-    object-position: bottom right;
-    z-index: 2;
-  }
-
-  /* 5. DESIGN PORTFOLIO ONDERAAN (6 kolommen breed) */
-  .hero-footer-title {
-    grid-column: 1 / span 5;
-    grid-row: 3;
-    align-self: flex-end;
-    z-index: 10;
-  }
-
-  .hero-footer-title h1 {
-    /* Calibrated to fill columns 1–6 on exactly one line. Same
-       cqi-lock logic as the heading above: holds at 1512px and
-       at 5120px because it's a ratio, not an absolute value. */
-    font-size: 5.2cqi;
-    font-weight: 900;
-    line-height: 0.9;
-    margin: 0;
-    white-space: nowrap;
-  }
-
-  
-  /* "DESIGN" rendered as an outline instead of solid black.
-     Stroke width is in cqi so it stays proportionally the same
-     thickness relative to the letterforms at every screen size —
-     a fixed px stroke would look hairline-thin on a 27" screen
-     and clumpy on a 14" laptop. */
-  .outline-text {
-    color: transparent;
-    -webkit-text-fill-color: #fff;
-    -webkit-text-stroke: 0.26cqi #000000;
-    text-stroke: 0.04cqi #000000;
-    paint-order: stroke fill;
-  }
-</style>
