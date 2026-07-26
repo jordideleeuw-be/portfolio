@@ -1,12 +1,19 @@
 ---
 // Spacer.astro — full-width white breathing room between screens.
+// `compact` keeps the original (smaller) size — used only between Hero and
+// FinalWork; every other spacer on the page uses the bigger default.
+const { compact = false } = Astro.props;
 ---
-<div class="spacer"></div>
+<div class={`spacer ${compact ? 'spacer--compact' : ''}`}></div>
 
 <style>
   .spacer {
     width: 100%;
-    height: clamp(100px, 16vh, 300px);
+    height: clamp(150px, 24vh, 450px);
     background-color: #FFF;
+  }
+
+  .spacer--compact {
+    height: clamp(100px, 16vh, 300px);
   }
 </style>

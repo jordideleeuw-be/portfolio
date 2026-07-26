@@ -72,8 +72,8 @@ const framePaddingTopPercent = (1 / frameAspectRatio) * 100;
 <section class="screen magazine">
   <SplitLayout
     client:load
-    title="JIDLI — Editorial Magazine"
-    description="A printed companion piece for the JIDLI hybrid album — an editorial magazine spread covering the visual essay, typography direction, and behind-the-scenes process."
+    title="Personal Magazine"
+    description="Voor het vak Design 3 ontwierp ik een editorial magazine van acht pagina's dat functioneert als een visuele weerspiegeling van mijn identiteit en interesses. Als fundament bestudeerde ik de lay-outs, strakke grids en typografie van high-end modebladen zoals Vogue. Om dit klassieke stramien te doorbreken en er mijn eigen visuele handtekening aan te geven, heb ik de fotografie intensief bewerkt met experimentele Photoshop-technieken, waaronder duotone- en wave-effecten. Het resultaat is een dynamische publicatie waarin redactioneel ontwerp, complexe beeldbewerking en typografie samenkomen. Dit project illustreert hoe ik traditionele editorial conventies kan combineren met een persoonlijke, gedurfde esthetiek tot één kloppend visueel geheel."
     tools={["InDesign", "Photoshop", "Lightroom"]}
   >
     <div slot="leftContent" class="content-wrapper">
@@ -116,17 +116,55 @@ const framePaddingTopPercent = (1 / frameAspectRatio) * 100;
     background-color: transparent;
   }
 
+  /* Abs-positioned to match the classic padding-top hack on .spread-frame
+     (spans its full padding box), then flex-centers .spread-photo so
+     portrait cover/backcover letterbox correctly inside the frame's shared
+     landscape shape instead of stretching to fill it. */
+  .spread-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Locked to the IMAGE's own native ratio (not the frame's), capped by
+     max-width/height so it shrink-to-fits exactly like object-fit: contain
+     did — but as a real box, so the border hugs the actual visible photo
+     instead of ringing the invisible full-frame rectangle (which is what
+     happened when the border lived on .spread-image itself: cover/backcover
+     are portrait, so their box == the wide landscape frame, way bigger than
+     the letterboxed photo inside it). */
+  .spread-photo {
+    position: relative;
+    /* Height is the definite dimension (100% of the flex-centered parent);
+       width is derived from it via aspect-ratio. Needs to be explicit —
+       .spread-image inside is position:absolute, so it contributes no
+       intrinsic size for .spread-photo to auto-size against on its own. */
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    border: var(--image-border-width) solid #000000;
+  }
+
+  /* Native pixel dimensions: cover/backcover 5103x7158, spreads 10063x7158
+     (same source as frameAspectRatio in Magazine.astro's frontmatter). */
+  .spread-photo--portrait {
+    aspect-ratio: 5103 / 7158;
+  }
+
+  .spread-photo--landscape {
+    aspect-ratio: 10063 / 7158;
+  }
+
   .spread-image {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain; /* CRUCIAAL: Zorgt dat je foto ALTIJD in zijn originele verhouding past! */
+    object-fit: cover; /* .spread-photo already matches the image's exact ratio, so this just fills it */
     display: block;
-    /* filter (not box-shadow) so the shadow hugs the visible, letterboxed
-       image content instead of the full (invisible) frame rectangle. */
-    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15));
   }
 
   /* Two-stage load: stage 1 (the base .spread-image) renders immediately
@@ -141,23 +179,61 @@ const framePaddingTopPercent = (1 / frameAspectRatio) * 100;
     opacity: 1;
   }
 
-  /* Knoppen styling */
+  /* Knoppen styling — a real 12-column slice of the site grid (same
+     var(--grid-gutter) as .grid-overlay/.hero-grid), not a centered
+     max-width:600px flex row, so the buttons can be pinned to exact
+     column lines instead of just centered under the frame. */
   .magazine-nav {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
     align-items: center;
-    justify-content: space-between;
     width: 100%;
-    max-width: 600px;
+  }
+
+  /* Right edge lines up with column 4's right edge. */
+  .nav-btn--prev {
+    grid-column: 4;
+    justify-self: end;
+  }
+
+  /* Left edge lines up with column 8's left edge. */
+  .nav-btn--next {
+    grid-column: 9;
+    justify-self: start;
   }
 
   .nav-btn {
     background: none;
     border: none;
-    padding: 0.5rem;
+    /* No padding: the button's own box is pinned flush to the grid column
+       line (see .nav-btn--prev/--next below), so any padding here would
+       inset the icon away from that line instead of sitting flush on it. */
+    padding: 0;
+    /* Half of one 12-column grid-column's width — cqi-based (not a fixed
+       rem), against .project-media's inline-size in Layout.astro (the same
+       container the image borders use, and the exact width the 12-column
+       math runs against). One column = (100cqi total, minus 11 gutters) /
+       12; halved = /24. Explicit (not content-derived) because the
+       container-type below applies size containment, which strips a box's
+       own ability to auto-size from its content — an auto/content-hugging
+       width would collapse to 0 instead of fitting the icon.
+       clamp()'d for the same reason the hero contact/lang buttons needed a
+       cap: cqi tied to a near-full-page-width container scales forever on
+       very wide screens without one. */
+    width: clamp(3rem, calc((100cqi - 11 * var(--grid-gutter)) / 24), 5.5rem);
+    height: clamp(3rem, calc((100cqi - 11 * var(--grid-gutter)) / 24), 5.5rem);
     display: flex;
     align-items: center;
+    justify-content: center;
     cursor: pointer;
     transition: opacity 0.2s ease;
+    /* Establishes the cqi context for .nav-arrow-icon and
+       .nav-arrow-icon--disabled's outline width below — scoped to this
+       small local button box (not the full 12-column .magazine-nav above),
+       so it can't balloon the way the hero buttons did against a
+       full-width container. */
+    container-type: inline-size;
   }
 
   .nav-btn:hover:not(:disabled) {
@@ -165,17 +241,25 @@ const framePaddingTopPercent = (1 / frameAspectRatio) * 100;
   }
 
   .nav-btn:disabled {
-    opacity: 0.25;
     cursor: not-allowed;
   }
 
   .nav-arrow-icon {
-    width: 2rem;
+    /* 100cqi (not 90) — fills the button's box exactly so the arrow's own
+       edges sit flush with it, and therefore flush with the grid column
+       line the button is pinned to. */
+    width: 100cqi;
     height: auto;
     display: block;
-    /* arrow.svg is baked white for use on SplitLayout's dark info panel —
-       brightness(0) forces it black here without touching that file. */
-    filter: brightness(0);
+    fill: #000000;
+  }
+
+  /* Disabled state: hollow instead of dimmed — white fill, black outline. */
+  .nav-arrow-icon--disabled {
+    fill: #ffffff;
+    stroke: #000000;
+    stroke-width: var(--arrow-outline-width);
+    stroke-linejoin: round;
   }
 
   .nav-btn--prev .nav-arrow-icon {

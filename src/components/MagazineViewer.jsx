@@ -7,6 +7,24 @@ import React, { useState, useRef, useEffect } from "react";
 // bandwidth. Mounted fresh (via `key={spread.id}` in the parent) on every
 // navigation, so each spread gets its own two-stage load, not just the
 // first one shown.
+// Inlined (not <img src="/icons/arrow.svg">) so the disabled state below can
+// set its own fill/stroke directly — an external <img> can't be recolored
+// per-state without CSS filter hacks.
+function ArrowIcon({ disabled }) {
+	return (
+		<svg
+			viewBox="0 0 450 300"
+			className={`nav-arrow-icon${disabled ? " nav-arrow-icon--disabled" : ""}`}
+			aria-hidden="true"
+		>
+			<polygon
+				points="450 150 210.61 0 248.25 100 0 100 0 200 248.25 200 210.61 300 450 150"
+				vectorEffect="non-scaling-stroke"
+			/>
+		</svg>
+	);
+}
+
 function SpreadImage({ spread, priority }) {
 	const [stage1Loaded, setStage1Loaded] = useState(false);
 	const [stage2Loaded, setStage2Loaded] = useState(false);
@@ -23,34 +41,37 @@ function SpreadImage({ spread, priority }) {
 	}, []);
 
 	return (
-		<>
-			<img
-				ref={stage1Ref}
-				src={spread.stage1Src}
-				width={spread.stage1Width}
-				height={spread.stage1Height}
-				alt={spread.caption}
-				className="spread-image"
-				loading={priority ? "eager" : "lazy"}
-				onLoad={() => setStage1Loaded(true)}
-			/>
-			{stage1Loaded && (
+		<div className="spread-content">
+			<div className={`spread-photo spread-photo--${spread.orientation}`}>
 				<img
-					srcSet={spread.fullSrcSet}
-					sizes="(max-width: 900px) 100vw, 95vw"
-					alt=""
-					aria-hidden="true"
-					className={`spread-image spread-image--full ${stage2Loaded ? "loaded" : ""}`}
-					onLoad={() => setStage2Loaded(true)}
+					ref={stage1Ref}
+					src={spread.stage1Src}
+					width={spread.stage1Width}
+					height={spread.stage1Height}
+					alt={spread.caption}
+					className="spread-image"
+					loading={priority ? "eager" : "lazy"}
+					onLoad={() => setStage1Loaded(true)}
 				/>
-			)}
-		</>
+				{stage1Loaded && (
+					<img
+						srcSet={spread.fullSrcSet}
+						sizes="(max-width: 900px) 100vw, 95vw"
+						alt=""
+						aria-hidden="true"
+						className={`spread-image spread-image--full ${stage2Loaded ? "loaded" : ""}`}
+						onLoad={() => setStage2Loaded(true)}
+					/>
+				)}
+			</div>
+		</div>
 	);
 }
 
 export default function MagazineViewer({ spreads, framePaddingTopPercent }) {
-	// Dit houdt bij op welke spread we nu zitten (begint bij 0, dus de cover)
-	const [currentIndex, setCurrentIndex] = useState(0);
+	// Starts on Spread 1 (index 1), not the cover (index 0) — prev still
+	// goes back to the cover, it's just not the first thing shown.
+	const [currentIndex, setCurrentIndex] = useState(1);
 	const current = spreads[currentIndex];
 
 	// Functie voor de volgende pagina
@@ -74,17 +95,17 @@ export default function MagazineViewer({ spreads, framePaddingTopPercent }) {
 				className={`spread-frame spread-frame--${current.orientation}`}
 				style={{ paddingTop: `${framePaddingTopPercent}%` }}
 			>
-				<SpreadImage key={current.id} spread={current} priority={currentIndex === 0} />
+				<SpreadImage key={current.id} spread={current} priority={currentIndex === 1} />
 			</div>
 
 			{/* DE NAVIGATIE */}
 			<div className="magazine-nav">
 				<button onClick={prevSpread} disabled={currentIndex === 0} className="nav-btn nav-btn--prev" aria-label="Previous page">
-					<img src="/icons/arrow.svg" alt="" className="nav-arrow-icon" />
+					<ArrowIcon disabled={currentIndex === 0} />
 				</button>
 
 				<button onClick={nextSpread} disabled={currentIndex === spreads.length - 1} className="nav-btn nav-btn--next" aria-label="Next page">
-					<img src="/icons/arrow.svg" alt="" className="nav-arrow-icon" />
+					<ArrowIcon disabled={currentIndex === spreads.length - 1} />
 				</button>
 			</div>
 		</div>

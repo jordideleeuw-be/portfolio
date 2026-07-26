@@ -28,8 +28,10 @@ const showcaseFullSrcset = showcaseFullVariants.map((v) => `${v.src} ${v.attribu
   <SplitLayout 
     client:load
     title="JIDLI — Hybrid Album"
-    description="An exploratory project merging physical K-pop packaging with digital interfaces. The showcase includes a custom interactive iPad application, an NFC card scanner slot, and a printed editorial magazine."
-    tools={["InDesign", "Illustrator", "Photoshop", "Lightroom", "After Effects", "Premiere Pro", "Figma", "Maya", "Google AI", "Suno", "Swift"]}
+    description={`Voor mijn eindwerk binnen de opleiding Multimedia & Creatieve Technologie onderzocht ik hoe de integratie van een interactief, fysiek object de K-pop albumervaring gelaagder en intenser kan maken. Om de volledige creatieve controle te hebben, ontwikkelde ik 'JIDLI': een fictieve K-pop groep compleet met een eigen visuele identiteit, karakters en songteksten voor het debuutalbum Unidentified Frivolous Object. Door deze wereld vanaf nul op te bouwen, kon ik de esthetiek en functionaliteit perfect afstemmen op mijn onderzoeksvraag.
+De kern van het project is de brug tussen fysiek verzamelobject en digitale interface. Ik ontwierp een op maat gemaakte behuizing waarin het klassieke papieren fotoboek is getransformeerd naar een interactieve applicatie op een ingebouwde iPad. De fysieke fotokaarten die ik ontwierp, zijn uitgerust met NFC-tags. Zodra deze in het verborgen scan-element van de behuizing worden geplaatst, ontgrendelen ze unieke, digitale verhalen op het scherm.
+Ieder groepslid heeft zo een eigen verhaallijn en muzieknummer gekregen. Door deze tastbare interactie bouwt de gebruiker een veel directere connectie op met de artiesten. Van de fysieke behuizing en de grafische extra's tot de digitale UX/UI-flow: alles is volledig zelf ontworpen. Het resultaat is een modern verzamelobject dat traditioneel grafisch design naadloos laat samensmelten met interactieve technologie.`}
+    tools={["InDesign", "Illustrator", "Photoshop", "After Effects", "Premiere Pro", "Figma", "Maya", "Google AI", "Suno", "Swift"]}
   >
     {/* ALLES WAT JE HIER TUSSEN ZET, KOMT AUTOMATISCH IN DE 9-KOLOMMEN LINKERKANT! */}
     <div slot="leftContent" class="my-visuals">
@@ -81,6 +83,18 @@ const showcaseFullSrcset = showcaseFullVariants.map((v) => `${v.src} ${v.attribu
     stage2.className = 'showcase-image showcase-image--full';
     stage2.sizes = '(max-width: 900px) 100vw, 95vw';
     stage2.srcset = showcaseFullSrcset;
+    // Astro's scoped <style> below only tags elements present in the
+    // static template (via a data-astro-cid-* attribute added at compile
+    // time) — an element created here via JS never gets it, so the scoped
+    // .showcase-image--full rule (position:absolute, opacity, etc.) was
+    // silently not matching, and stage 2 rendered as a second plain image
+    // stacked below stage 1 instead of overlaying it. Copying the
+    // attribute from stage1 (which does have it) fixes that.
+    for (const attr of stage1.attributes) {
+      if (attr.name.startsWith('data-astro-cid')) {
+        stage2.setAttribute(attr.name, attr.value);
+      }
+    }
     stage2.addEventListener('load', () => stage2.classList.add('loaded'), { once: true });
     wrapper.appendChild(stage2);
   }
@@ -129,6 +143,7 @@ const showcaseFullSrcset = showcaseFullVariants.map((v) => `${v.src} ${v.attribu
   .showcase-wrapper {
     position: relative;
     width: 100%;
+    border: var(--image-border-width) solid #000000;
   }
 
   .showcase-image {
@@ -161,6 +176,7 @@ const showcaseFullSrcset = showcaseFullVariants.map((v) => `${v.src} ${v.attribu
     background-color: #000000;
     overflow: hidden;
     cursor: pointer;
+    border: var(--image-border-width) solid #000000;
   }
 
   .video-poster {
@@ -202,11 +218,20 @@ const showcaseFullSrcset = showcaseFullVariants.map((v) => `${v.src} ${v.attribu
     color: #000000;
   }
 
+  /* Real 4-column-span slice of the site's 12-column grid (var(--grid-gutter),
+     same as .grid-overlay/.hero-grid) instead of an independent repeat(3, 1fr)
+     with a flat 1rem gap — that local grid only coincidentally lined up with
+     the real grid at some viewport widths and drifted at others. */
   .placeholder-row {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    row-gap: var(--grid-gutter);
+  }
+
+  .placeholder-row > * {
+    grid-column: span 4;
   }
 
   /* 4:3 ratio via the padding-top percentage hack (not the `aspect-ratio`
@@ -218,10 +243,7 @@ const showcaseFullSrcset = showcaseFullVariants.map((v) => `${v.src} ${v.attribu
     padding-top: 75%;
     position: relative;
     background-color: rgba(0, 0, 0, 0.15);
-    /* outline instead of border — border would add to the box-sizing
-       calculation and throw off the 4:3 ratio from the padding-top hack. */
-    outline: 2px dashed rgba(0, 0, 0, 0.4);
-    outline-offset: -2px;
+    border: var(--image-border-width) solid #000000;
   }
 
   .placeholder-label {

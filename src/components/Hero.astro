@@ -138,14 +138,17 @@ import headshot from '../assets/images/headshot.png';
     z-index: 50;
   }
 
+  /* Outline style, matching .read-more-btn in Layout.astro. */
   .btn-contact {
-    background-color: #000000;
-    color: #ffffff;
+    background-color: transparent;
+    border: 2px solid #000000;
+    color: #000000;
     text-decoration: none;
-    font-size: 0.85cqi;
-    font-weight: 800;
+    font-size: clamp(0.7rem, 0.85cqi, 0.95rem);
+    font-weight: 600;
     height: 2.5cqi;
     min-height: 36px;
+    max-height: 44px;
     padding: 0 1cqi;
     flex: 1;
     display: flex;
@@ -153,27 +156,30 @@ import headshot from '../assets/images/headshot.png';
     justify-content: center;
     letter-spacing: 0.05em;
     white-space: nowrap;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   .btn-contact:hover {
-    background-color: #333333;
+    background-color: #000000;
+    color: #ffffff;
   }
 
   .lang-dropdown {
     position: relative;
     height: 2.5cqi;
     min-height: 36px;
+    max-height: 44px;
   }
 
   .btn-lang {
     width: 2.5cqi;
     min-width: 36px;
+    max-width: 44px;
     height: 100%;
     background-color: #000000;
     color: #ffffff;
     border: none;
-    font-size: 0.85cqi;
+    font-size: clamp(0.7rem, 0.85cqi, 0.95rem);
     font-weight: 800;
     display: flex;
     align-items: center;
