@@ -31,7 +31,14 @@ import './Layout.css';
       function updateOverscrollColor() {
         const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
         const nearBottom = maxScroll > 0 && window.scrollY > maxScroll / 2;
-        document.documentElement.style.backgroundColor = nearBottom ? '#000' : '#fff';
+        const color = nearBottom ? '#000' : '#fff';
+        // Safari's rubber-band bounce paints from <body>'s background, not
+        // <html>'s — setting only documentElement (as before) left <body>
+        // pinned to its CSS white forever, so the bottom bounce never
+        // actually turned black on a real device. Both need the inline
+        // style since that's what needs to win over the stylesheet rule.
+        document.documentElement.style.backgroundColor = color;
+        document.body.style.backgroundColor = color;
       }
 
       updateOverscrollColor();
