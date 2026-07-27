@@ -2,8 +2,10 @@
 import { Image, getImage } from 'astro:assets';
 import SplitLayout from './SplitLayout.jsx';
 import jidliInclusions from '../assets/images/JIDLI_INCLUSIONS.png';
+import jidliInclusionsMobile from '../assets/images/JIDLI_INCLUSIONS_MOBILE_tall.png';
 import showreelPosterSrc from '../assets/images/showreel-poster.jpg';
 import jidliEventSrc from '../assets/images/Jidli_event.png';
+import jidli4Src from '../assets/images/JILDI_4_FINAL.png';
 import styles from './FinalWork.module.css';
 
 // A plain URL (not the <Image> component) since it's used as a native
@@ -25,11 +27,24 @@ const showcaseFullVariants = await Promise.all(
 );
 const showcaseFullSrcset = showcaseFullVariants.map((v) => `${v.src} ${v.attributes.width}w`).join(', ');
 
+// Same two-stage pattern, mobile-only — a separate 3:4 portrait source
+// (not just a resize of the desktop 4:3-ish one), shown tall and full
+// width instead of the desktop treatment. Smaller width tiers since it's
+// only ever displayed at phone width, not full-bleed on a desktop monitor.
+const showcaseMobileStage1 = await getImage({ src: jidliInclusionsMobile, width: 1200, format: 'webp' });
+const showcaseMobileFullWidths = [900, 1200, 1600, 2000, 2400, 2900];
+const showcaseMobileFullVariants = await Promise.all(
+  showcaseMobileFullWidths.map((width) => getImage({ src: jidliInclusionsMobile, width, format: 'webp' }))
+);
+const showcaseMobileFullSrcset = showcaseMobileFullVariants.map((v) => `${v.src} ${v.attributes.width}w`).join(', ');
+
 // Same two-stage pattern as Internship's grid tiles (half resolution
 // first, then native), not the showcase image's big multi-tier srcset —
 // this is a small grid tile, not full-bleed hero content.
 const eventStage1 = await getImage({ src: jidliEventSrc, width: Math.round(jidliEventSrc.width / 2), format: 'webp' });
 const eventFull = await getImage({ src: jidliEventSrc, width: jidliEventSrc.width, format: 'webp' });
+
+const jidli4 = await getImage({ src: jidli4Src, width: 1600, format: 'webp' });
 ---
 
 <section class={styles.screen}>
@@ -43,16 +58,31 @@ Ieder groepslid heeft zo een eigen verhaallijn en muzieknummer gekregen. Door de
   >
     {/* ALLES WAT JE HIER TUSSEN ZET, KOMT AUTOMATISCH IN DE 9-KOLOMMEN LINKERKANT! */}
     <div slot="leftContent" class={styles['my-visuals']}>
-      <div class={styles['showcase-wrapper']}>
-        <img
-          src={showcaseStage1.src}
-          alt="JIDLI — Hybrid Album showcase"
-          class={styles['showcase-image']}
-          id="showcase-stage1"
-          width={showcaseStage1.attributes.width}
-          height={showcaseStage1.attributes.height}
-          loading="lazy"
-        />
+      <div class={styles['showcase-desktop']}>
+        <div class={styles['showcase-wrapper']}>
+          <img
+            src={showcaseStage1.src}
+            alt="JIDLI — Hybrid Album showcase"
+            class={styles['showcase-image']}
+            data-full-srcset={showcaseFullSrcset}
+            width={showcaseStage1.attributes.width}
+            height={showcaseStage1.attributes.height}
+            loading="lazy"
+          />
+        </div>
+      </div>
+      <div class={styles['showcase-mobile']}>
+        <div class={styles['showcase-wrapper']}>
+          <img
+            src={showcaseMobileStage1.src}
+            alt="JIDLI — Hybrid Album showcase"
+            class={styles['showcase-image']}
+            data-full-srcset={showcaseMobileFullSrcset}
+            width={showcaseMobileStage1.attributes.width}
+            height={showcaseMobileStage1.attributes.height}
+            loading="lazy"
+          />
+        </div>
       </div>
       <div class={styles['placeholder-row']}>
         {/* Native <video poster> + preload="none": the browser shows the
@@ -81,49 +111,60 @@ Ieder groepslid heeft zo een eigen verhaallijn en muzieknummer gekregen. Door de
             loading="lazy"
           />
         </div>
-        <div class={styles['placeholder-box']}><span class={styles['placeholder-label']}>Add image</span></div>
+        <div class={styles['placeholder-box']}>
+          <img
+            src={jidli4.src}
+            width={jidli4.attributes.width}
+            height={jidli4.attributes.height}
+            alt="JIDLI mockup"
+            class={styles['tile-image']}
+            loading="lazy"
+          />
+        </div>
       </div>
     </div>
   </SplitLayout>
 </section>
 
 <script define:vars={{
-  showcaseFullSrcset,
   showcaseImageClass: styles['showcase-image'],
   showcaseImageFullClass: styles['showcase-image--full'],
   loadedClass: styles.loaded,
 }}>
-  // Sequential two-stage upgrade: only start fetching the full-res
-  // srcset once the fast 2600px stage-1 image has actually finished
-  // loading, so the two never compete for bandwidth.
-  const stage1 = document.getElementById('showcase-stage1');
+  // Sequential two-stage upgrade: only start fetching each one's full-res
+  // srcset once its own fast stage-1 image has actually finished loading,
+  // so the two never compete for bandwidth. Loops over every showcase
+  // stage-1 on the page (desktop's 4:3-ish version and the mobile 3:4
+  // one) — same upgrade logic, each with its own srcset via data-full-srcset.
+  const stage1Images = document.querySelectorAll(`.${showcaseImageClass}[data-full-srcset]`);
 
-  function upgradeShowcaseToFullRes() {
+  stage1Images.forEach((stage1) => {
+    if (!(stage1 instanceof HTMLImageElement)) return;
     const showcaseWrapper = stage1.parentElement;
-    if (!showcaseWrapper) return;
-    const stage2 = document.createElement('img');
-    stage2.alt = '';
-    stage2.setAttribute('aria-hidden', 'true');
-    // CSS Modules hashes class names into the imported `styles` object
-    // itself, so setting className with those hashed strings is enough to
-    // match the module's rules — unlike Astro's own scoped <style> (which
-    // needs a separate data-astro-cid-* attribute copied onto elements
-    // created here via JS), there's no extra step needed for an element
-    // that was never in the static template.
-    stage2.className = `${showcaseImageClass} ${showcaseImageFullClass}`;
-    stage2.sizes = '(max-width: 900px) 100vw, 95vw';
-    stage2.srcset = showcaseFullSrcset;
-    stage2.addEventListener('load', () => stage2.classList.add(loadedClass), { once: true });
-    showcaseWrapper.appendChild(stage2);
-  }
+    const fullSrcset = stage1.dataset.fullSrcset;
+    if (!showcaseWrapper || !fullSrcset) return;
 
-  if (stage1 instanceof HTMLImageElement) {
+    function upgradeShowcaseToFullRes() {
+      const stage2 = document.createElement('img');
+      stage2.alt = '';
+      stage2.setAttribute('aria-hidden', 'true');
+      // CSS Modules hashes class names into the imported `styles` object
+      // itself, so setting className with those hashed strings is enough
+      // to match the module's rules — no data-astro-cid copying needed
+      // for elements created here via JS.
+      stage2.className = `${showcaseImageClass} ${showcaseImageFullClass}`;
+      stage2.sizes = '(max-width: 900px) 100vw, 95vw';
+      stage2.srcset = fullSrcset;
+      stage2.addEventListener('load', () => stage2.classList.add(loadedClass), { once: true });
+      showcaseWrapper.appendChild(stage2);
+    }
+
     if (stage1.complete) {
       upgradeShowcaseToFullRes();
     } else {
       stage1.addEventListener('load', upgradeShowcaseToFullRes, { once: true });
     }
-  }
+  });
 </script>
 
 <script define:vars={{

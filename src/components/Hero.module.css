@@ -33,6 +33,15 @@
   container-type: inline-size;
 }
 
+/* Mobile: a real 4-column grid (matching the rest of the site) instead of
+   squeezing the desktop 12-column layout's column numbers down — those
+   values (11/span2, 8/span5, etc.) only make sense against 12 tracks. */
+@media (max-width: 768px) {
+  .hero-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 /* =========================================================
    🎯 WISKUNDIG EXACTE SCHALING (cqi) — NU ZONDER PLAFOND
    ========================================================= */
@@ -47,13 +56,26 @@
   width: 100%;
 }
 
+/* Explicit "1 /" start line (not the bare "span 3" shorthand) — bare span
+   with no start line, combined with container-type: inline-size on
+   .hero-grid, triggers a real browser bug where the grid computes 3 extra
+   phantom implicit tracks (found by bisecting: removing this element, or
+   giving it an explicit start line instead of relying on auto-placement,
+   both make the phantom tracks disappear). Same fix pattern as the
+   grid-column: 2/-1 → 2/span 3 change on .hero-photo-container below. */
+@media (max-width: 768px) {
+  .hero-title {
+    grid-column: 1 / span 3;
+  }
+}
+
 .hero-logo-svg {
   width: 100%;
   height: auto;
   display: block;
 }
 
-/* 2. CONTACT RECHTSBOVEN (Kolom 11 en 12) */
+/* 2. CONTACT RECHTSBOVEN (Kolom 11 en 12 desktop) */
 .hero-top-right {
   grid-column: 11 / span 2;
   grid-row: 1;
@@ -61,6 +83,17 @@
   align-items: flex-start;
   width: 100%;
   z-index: 50;
+}
+
+/* Mobile: the remaining 4th column, after the logo's 3. justify-content:
+   flex-end so the button (now shrunk to 60% width, see .btn-contact
+   below) stays flush against the right edge of the cell instead of the
+   freed-up space appearing on the right. */
+@media (max-width: 768px) {
+  .hero-top-right {
+    grid-column: 4;
+    justify-content: flex-end;
+  }
 }
 
 /* Outline style, matching .read-more-btn in SplitLayout.module.css — same
@@ -86,24 +119,34 @@
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Mobile: the shared desktop width doesn't fit this cell at all — columns
-   11-12 of the 12-column hero grid are only ~58px wide at phone widths, so
-   the fixed shared width was overflowing straight past the edge of the
-   screen. Filling the actual (correctly-positioned) grid cell instead of a
-   fixed width is what "following the grid" means here — but that cell is
-   still too narrow for "KOM IN CONTACT" on one line at any legible size,
-   so it wraps to two lines instead of overflowing. */
+.btn-contact-icon {
+  display: none;
+}
+
+/* Mobile: icon instead of the text — a single grid column is only ~58px
+   wide at phone widths, nowhere near enough room for "KOM IN CONTACT" on
+   one line at any legible size (that's the whole reason this used to wrap
+   to two tiny lines). Filling the actual grid cell with a plain square
+   icon button sidesteps the problem instead of working around it. */
 @media (max-width: 768px) {
   .btn-contact {
-    width: 100%;
+    width: 60%;
     height: auto;
     min-height: 44px;
     max-height: none;
-    padding: 0.4rem 0.3rem;
-    font-size: 0.6rem;
-    line-height: 1.2;
-    white-space: normal;
-    text-align: center;
+    aspect-ratio: 1;
+    padding: 0;
+    margin-left: auto;
+  }
+
+  .btn-contact-text {
+    display: none;
+  }
+
+  .btn-contact-icon {
+    display: block;
+    width: 45%;
+    height: 45%;
   }
 }
 
@@ -125,6 +168,17 @@
   pointer-events: none;
 }
 
+/* Mobile: full 4-column width, matching .hero-footer-title below.
+   Explicit "1 /" start line (not a bare "span 4") — see the bare-span
+   phantom-implicit-track bug documented on .hero-title above; every
+   grid-column rule on this cqi/container-type grid uses an explicit
+   start line for that reason. */
+@media (max-width: 768px) {
+  .hero-photo-container {
+    grid-column: 1 / span 4;
+  }
+}
+
 .hero-photo {
   width: 100%;
   height: 100%;
@@ -142,6 +196,13 @@
   z-index: 10;
 }
 
+@media (max-width: 768px) {
+  .hero-footer-title {
+    grid-column: 1 / span 4;
+    margin-bottom: calc(var(--grid-margin) * 2);
+  }
+}
+
 .hero-footer-title h1 {
   /* Calibrated to fill columns 1–6 on exactly one line. Same
      cqi-lock logic as the heading above: holds at 1512px and
@@ -151,6 +212,17 @@
   line-height: 0.9;
   margin: 0;
   white-space: nowrap;
+}
+
+/* Mobile: the footer title's grid area is now the full 4-column width
+   (100% of the grid) instead of desktop's ~5/12 — cqi is relative to the
+   whole .hero-grid container regardless of column span, so the font-size
+   needs its own scale-up here to actually fill the wider area on one
+   line (measured: 5.2cqi rendered at ~50% of the box width at 390px). */
+@media (max-width: 768px) {
+  .hero-footer-title h1 {
+    font-size: 10.4cqi;
+  }
 }
 
 /* "DESIGN" rendered as an outline instead of solid black.
@@ -164,4 +236,16 @@
   -webkit-text-stroke: 0.26cqi #000000;
   text-stroke: 0.04cqi #000000;
   paint-order: stroke fill;
+}
+
+/* "PORTFOLIO" stays solid black on desktop, but matches "DESIGN"'s
+   white-fill/black-outline treatment on mobile only. */
+@media (max-width: 768px) {
+  .outline-text-mobile {
+    color: transparent;
+    -webkit-text-fill-color: #fff;
+    -webkit-text-stroke: 0.26cqi #000000;
+    text-stroke: 0.04cqi #000000;
+    paint-order: stroke fill;
+  }
 }

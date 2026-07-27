@@ -3,11 +3,11 @@
    ========================================================= */
 
 @font-face {
-  font-family: 'EmberCrown';
-  src: url('/fonts/EmberCrown.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+	font-family: "EmberCrown";
+	src: url("/fonts/EmberCrown.otf") format("opentype");
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
 }
 
 /* Only 4 weights declared — the exact ones actually used anywhere on the
@@ -19,48 +19,48 @@
    Gibson-SemiBold.ttf, Gibson-Bold.ttf) — Heavy is still the Fontspring
    demo file (kept deliberately; titles aren't causing visible issues). */
 @font-face {
-  font-family: 'Gibson';
-  src: url('/fonts/Gibson.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
+	font-family: "Gibson";
+	src: url("/fonts/Gibson.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
 }
 @font-face {
-  font-family: 'Gibson';
-  src: url('/fonts/Gibson-SemiBold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
+	font-family: "Gibson";
+	src: url("/fonts/Gibson-SemiBold.ttf") format("truetype");
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
 }
 @font-face {
-  font-family: 'Gibson';
-  src: url('/fonts/Gibson-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
+	font-family: "Gibson";
+	src: url("/fonts/Gibson-Bold.ttf") format("truetype");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
 }
 @font-face {
-  font-family: 'Gibson';
-  src: url('/fonts/Fontspring-DEMO-gibson-heavy.otf') format('opentype');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
+	font-family: "Gibson";
+	src: url("/fonts/Fontspring-DEMO-gibson-heavy.otf") format("opentype");
+	font-weight: 900;
+	font-style: normal;
+	font-display: swap;
 }
 
 /* =========================================================
    🛠️ 2. JOUW VARIABELE CONTROLS (GRID & FONTS)
    ========================================================= */
 :root {
-  --font-base: 'Gibson', system-ui, -apple-system, sans-serif;
-  --font-serif: 'EmberCrown', 'Times New Roman', serif;
+	--font-base: "Gibson", system-ui, -apple-system, sans-serif;
+	--font-serif: "EmberCrown", "Times New Roman", serif;
 
-  --grid-cols: 12;
-  --grid-gutter: 1vw;
-  --grid-margin: 3cqi;
-  --grid-color: rgba(0, 0, 0, 0.01);
-  --grid-status: grid;
+	--grid-cols: 12;
+	--grid-gutter: 1vw;
+	--grid-margin: 3cqi;
+	--grid-color: rgba(0, 0, 0, 0);
+	--grid-status: grid;
 
-  /* Manually tweak these two to resize the black border around every
+	/* Manually tweak these two to resize the black border around every
      project image (FinalWork/Magazine/Internship) and the black outline
      on the magazine's disabled nav arrow. Both are cqi (scale with their
      own local container, not the full page) — image borders scale with
@@ -71,33 +71,41 @@
      — before that fix, the icon's own internal SVG scale-down was
      shrinking the stroke too, which is why it needed an oversized 30cqi
      just to read as a thin line. */
-  --image-border-width: 0.1cqi;
-  --arrow-outline-width: 3cqi;
+	--image-border-width: 0.1cqi;
+	--arrow-outline-width: 3cqi;
 
-  /* Shared by .btn-contact (Hero.module.css) and .read-more-btn
+	/* Shared by .btn-contact (Hero.module.css) and .read-more-btn
      (SplitLayout.module.css) so "KOM IN CONTACT"/"Read More"/"Read Less"
      render at genuinely identical size — those two buttons live in
      different containers (.hero-grid vs .project-block), so even
      matching cqi formulas would still compute different actual pixel
      values between them. A plain rem value referenced by both is the only
      way to guarantee they're actually the same, not just similar. */
-  --corner-btn-font-size: 1rem;
-  --corner-btn-width: 11rem;
+	--corner-btn-font-size: 1rem;
+	--corner-btn-width: 11rem;
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
 }
 
-html, body {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden !important;
-  margin: 0;
-  padding: 0;
-  font-family: var(--font-base);
+html,
+body {
+	width: 100%;
+	max-width: 100%;
+	overflow-x: hidden !important;
+	margin: 0;
+	padding: 0;
+	font-family: var(--font-base);
+	/* Baseline for the very first paint (page always loads scrolled to the
+     top) — a small inline script in Layout.astro takes over from here,
+     switching this to black once you scroll/bounce past the midpoint so
+     the overscroll fill matches the footer at the bottom instead. */
+	background-color: #fff;
 }
 
 /* =========================================================
@@ -112,25 +120,25 @@ html, body {
    two grids stay mathematically identical at all sizes.
    ========================================================= */
 .grid-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  height: 100vh;
-  z-index: 9999;
-  pointer-events: none;
-  display: var(--grid-status);
-  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
-  column-gap: var(--grid-gutter);
-  padding: 0 var(--grid-margin);
-  box-sizing: border-box;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	width: 100%;
+	height: 100vh;
+	z-index: 9999;
+	pointer-events: none;
+	display: var(--grid-status);
+	grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+	column-gap: var(--grid-gutter);
+	padding: 0 var(--grid-margin);
+	box-sizing: border-box;
 }
 
 .grid-overlay .col {
-  width: 100%;
-  height: 100%;
-  background-color: var(--grid-color);
+	width: 100%;
+	height: 100%;
+	background-color: var(--grid-color);
 }
 
 /* Mobile: 4 columns instead of 12. Overrides .grid-overlay's own column
@@ -143,16 +151,16 @@ html, body {
    grid as its own thing; real content grids move to 4 columns as each
    section gets its mobile layout done. */
 @media (max-width: 768px) {
-  .grid-overlay {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+	.grid-overlay {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
 
-  /* The overlay's 12 .col divs are static markup (Layout.astro), not
+	/* The overlay's 12 .col divs are static markup (Layout.astro), not
      generated from --grid-cols — with only 4 explicit tracks now, the
      other 8 would otherwise wrap into extra implicit rows instead of
      just not existing. Hiding them keeps it an actual 4-column overlay
      instead of 4 columns x 3 stacked rows. */
-  .grid-overlay .col:nth-child(n + 5) {
-    display: none;
-  }
+	.grid-overlay .col:nth-child(n + 5) {
+		display: none;
+	}
 }

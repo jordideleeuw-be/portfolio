@@ -18,5 +18,23 @@ import './Layout.css';
 
     <!-- HIER KOMT AL JOUW PAGINA CONTENT IN -->
     <slot />
+
+    <script>
+      // The elastic overscroll bounce (mobile Safari) fills with whatever
+      // background-color <html> currently has — there's no way to give the
+      // top and bottom edges different colors with CSS alone, since it's a
+      // single property for the whole page. Toggling it based on scroll
+      // position instead: white while nearer the top (matches Hero),
+      // black once you're past the midpoint (matches the footer).
+      function updateOverscrollColor() {
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const nearBottom = maxScroll > 0 && window.scrollY > maxScroll / 2;
+        document.documentElement.style.backgroundColor = nearBottom ? '#000' : '#fff';
+      }
+
+      updateOverscrollColor();
+      window.addEventListener('scroll', updateOverscrollColor, { passive: true });
+      window.addEventListener('resize', updateOverscrollColor);
+    </script>
   </body>
 </html>

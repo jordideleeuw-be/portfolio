@@ -2,7 +2,9 @@
 // Spacer.astro — full-width white breathing room between screens.
 // `compact` keeps the original (smaller) size — used only between Hero and
 // FinalWork; every other spacer on the page uses the bigger default.
+// `footer` is the spacer right before the site footer — shorter on mobile
+// so the footer sits higher when you scroll all the way down.
 import styles from './Spacer.module.css';
-const { compact = false } = Astro.props;
+const { compact = false, footer = false } = Astro.props;
 ---
-<div class={`${styles.spacer} ${compact ? styles['spacer--compact'] : ''}`}></div>
+<div class={`${styles.spacer} ${compact ? styles['spacer--compact'] : ''} ${footer ? styles['spacer--footer'] : ''}`}></div>

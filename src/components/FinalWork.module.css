@@ -11,6 +11,30 @@
   gap: var(--grid-margin);
 }
 
+/* Desktop shows the 4:3-ish full-bleed version; mobile swaps in a
+   separate tall 3:4 source instead (JIDLI_INCLUSIONS_MOBILE.png) — CSS
+   toggles which one's visible, same pattern as Magazine's desktop/mobile
+   viewer split. Both stay in the DOM either way, but display:none means
+   the hidden one's <img loading="lazy"> never actually fetches. */
+.showcase-desktop {
+  width: 100%;
+}
+
+.showcase-mobile {
+  display: none;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .showcase-desktop {
+    display: none;
+  }
+
+  .showcase-mobile {
+    display: block;
+  }
+}
+
 /* Two-stage load, both genuinely sharp — no blur trick. Stage 1 (2600px)
    is a normal in-flow image, so it establishes the wrapper's real height
    via its own width:100%/height:auto aspect ratio. Stage 2 (full-res,
@@ -155,20 +179,3 @@
   opacity: 1;
 }
 
-.placeholder-label {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: rgba(0, 0, 0, 0.55);
-}

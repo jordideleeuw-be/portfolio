@@ -7,3 +7,9 @@
 .spacer--compact {
   height: clamp(100px, 16vh, 300px);
 }
+
+@media (max-width: 768px) {
+  .spacer--footer {
+    height: clamp(60px, 10vh, 150px);
+  }
+}

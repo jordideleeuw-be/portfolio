@@ -13,9 +13,17 @@ import styles from './Hero.module.css';
       <img src="/images/logo.svg" alt="Jordi De Leeuw" class={styles['hero-logo-svg']} />
     </div>
 
-    <!-- 2. CONTACT RECHTSBOVEN (Kolom 11 en 12) -->
+    <!-- 2. CONTACT RECHTSBOVEN (Kolom 11 en 12 desktop, kolom 4 mobiel) -->
     <div class={styles['hero-top-right']}>
-      <a href="mailto:deleeuwjordi@gmail.com" class={styles['btn-contact']}>KOM IN CONTACT</a>
+      <a href="mailto:deleeuwjordi@gmail.com" class={styles['btn-contact']} aria-label="Email">
+        {/* CSS swaps which one shows, same max-width:768px breakpoint as
+            everywhere else — text on desktop, mail icon on mobile (that
+            corner cell is only 1 of 4 columns there, no room for text). */}
+        <span class={styles['btn-contact-text']}>KOM IN CONTACT</span>
+        <svg class={styles['btn-contact-icon']} viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z" fill="currentColor" />
+        </svg>
+      </a>
     </div>
 
     <!-- 4. FOTO RECHTS (Kolom 8 tot 13 = 5 kolommen) -->
@@ -34,7 +42,7 @@ import styles from './Hero.module.css';
 
     <!-- 5. DESIGN PORTFOLIO ONDERAAN (6 kolommen breed) -->
     <div class={styles['hero-footer-title']}>
-      <h1><span class={styles['outline-text']}>DESIGN</span> PORTFOLIO</h1>
+      <h1><span class={styles['outline-text']}>DESIGN</span> <span class={styles['outline-text-mobile']}>PORTFOLIO</span></h1>
     </div>
 
   </div>
