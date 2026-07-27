@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import styles from "./SplitLayout.module.css";
 
 // Zet je eigen SVG's in public/icons/ — bestandsnaam = tool-naam in

@@ -1,5 +1,5 @@
 ---
-import { Image, getImage } from 'astro:assets';
+import { getImage } from 'astro:assets';
 import SplitLayout from './SplitLayout.jsx';
 import jidliInclusions from '../assets/images/JIDLI_INCLUSIONS.png';
 import jidliInclusionsMobile from '../assets/images/JIDLI_INCLUSIONS_MOBILE_tall.png';
@@ -41,8 +41,8 @@ const showcaseMobileFullSrcset = showcaseMobileFullVariants.map((v) => `${v.src}
 // Same two-stage pattern as Internship's grid tiles (half resolution
 // first, then native), not the showcase image's big multi-tier srcset —
 // this is a small grid tile, not full-bleed hero content.
-const eventStage1 = await getImage({ src: jidliEventSrc, width: Math.round(jidliEventSrc.width / 2), format: 'webp' });
-const eventFull = await getImage({ src: jidliEventSrc, width: jidliEventSrc.width, format: 'webp' });
+const eventFull = await getImage({ src: jidliEventSrc, format: 'webp' });
+const eventStage1 = await getImage({ src: jidliEventSrc, width: Math.round(eventFull.attributes.width / 2), format: 'webp' });
 
 const jidli4 = await getImage({ src: jidli4Src, width: 1600, format: 'webp' });
 ---

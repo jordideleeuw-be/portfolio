@@ -29,8 +29,8 @@ const galleryImages = [img01, img02, img03, img04, img05, img06, img07, img08, i
 // change size later.
 const imageTiles = await Promise.all(
   galleryImages.map(async (src) => {
-    const stage1 = await getImage({ src, width: Math.round(src.width / 2), format: 'webp' });
-    const full = await getImage({ src, width: src.width, format: 'webp' });
+    const full = await getImage({ src, format: 'webp' });
+    const stage1 = await getImage({ src, width: Math.round(full.attributes.width / 2), format: 'webp' });
     return {
       type: 'image',
       stage1Src: stage1.src,

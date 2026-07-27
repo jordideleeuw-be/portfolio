@@ -1,14 +1,6 @@
 /* =========================================================
-   ✍️ 1. CUSTOM FONTS INLADEN (GIBSON SUPER-FAMILY & EMBER CROWN)
+   ✍️ 1. CUSTOM FONTS INLADEN (GIBSON SUPER-FAMILY)
    ========================================================= */
-
-@font-face {
-	font-family: "EmberCrown";
-	src: url("/fonts/EmberCrown.otf") format("opentype");
-	font-weight: normal;
-	font-style: normal;
-	font-display: swap;
-}
 
 /* Only 4 weights declared — the exact ones actually used anywhere on the
    site (400/600/900 directly, 700 as a spare real weight you own; 800
@@ -52,7 +44,6 @@
    ========================================================= */
 :root {
 	--font-base: "Gibson", system-ui, -apple-system, sans-serif;
-	--font-serif: "EmberCrown", "Times New Roman", serif;
 
 	--grid-cols: 12;
 	--grid-gutter: 1vw;
