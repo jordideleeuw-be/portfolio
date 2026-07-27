@@ -116,10 +116,13 @@ const mobileFramePaddingTopPercent = (1 / mobileFrameAspectRatio) * 100;
   >
     <div slot="leftContent" class={styles['content-wrapper']}>
       <!-- Desktop: two-page spreads. CSS shows/hides based on viewport —
-           client:media below also skips hydrating the mobile viewer's JS
-           entirely until that media query actually matches. -->
+           both instances use client:media (mirror-image conditions) so
+           neither one hydrates, and neither one's initial spread image
+           fetches, while it's the hidden one. Used to be client:load on
+           this desktop instance, which hydrated (and fetched its image)
+           unconditionally on every device, phones included. -->
       <div class={styles['desktop-viewer']}>
-        <MagazineViewer client:load spreads={spreads} framePaddingTopPercent={framePaddingTopPercent} />
+        <MagazineViewer client:media="(min-width: 769px)" spreads={spreads} framePaddingTopPercent={framePaddingTopPercent} />
       </div>
       <div class={styles['mobile-viewer']}>
         <MagazineViewer client:media="(max-width: 768px)" spreads={mobileSpreads} framePaddingTopPercent={mobileFramePaddingTopPercent} initialIndex={0} />

@@ -61,7 +61,7 @@ Ieder groepslid heeft zo een eigen verhaallijn en muzieknummer gekregen. Door de
       <div class={styles['showcase-desktop']}>
         <div class={styles['showcase-wrapper']}>
           <img
-            src={showcaseStage1.src}
+            data-stage1-src={showcaseStage1.src}
             alt="JIDLI — Hybrid Album showcase"
             class={styles['showcase-image']}
             data-full-srcset={showcaseFullSrcset}
@@ -74,7 +74,7 @@ Ieder groepslid heeft zo een eigen verhaallijn en muzieknummer gekregen. Door de
       <div class={styles['showcase-mobile']}>
         <div class={styles['showcase-wrapper']}>
           <img
-            src={showcaseMobileStage1.src}
+            data-stage1-src={showcaseMobileStage1.src}
             alt="JIDLI — Hybrid Album showcase"
             class={styles['showcase-image']}
             data-full-srcset={showcaseMobileFullSrcset}
@@ -136,13 +136,25 @@ Ieder groepslid heeft zo een eigen verhaallijn en muzieknummer gekregen. Door de
   // so the two never compete for bandwidth. Loops over every showcase
   // stage-1 on the page (desktop's 4:3-ish version and the mobile 3:4
   // one) — same upgrade logic, each with its own srcset via data-full-srcset.
+  //
+  // Both showcase images stay in the DOM regardless of viewport (CSS
+  // toggles which one is display:none) — but display:none does NOT stop a
+  // plain <img src> from being fetched, it only affects native lazy-load
+  // heuristics (which need a layout box to measure distance against, and
+  // silently skip that check — and just fetch immediately — when there
+  // isn't one). That was making every visit download BOTH the desktop and
+  // mobile showcase image in full, every time. Fix: the real URL sits in
+  // data-stage1-src instead of src, and is only copied into src once
+  // offsetParent confirms this particular instance isn't hidden.
   const stage1Images = document.querySelectorAll(`.${showcaseImageClass}[data-full-srcset]`);
+  const deferredLoads = [];
 
   stage1Images.forEach((stage1) => {
     if (!(stage1 instanceof HTMLImageElement)) return;
     const showcaseWrapper = stage1.parentElement;
     const fullSrcset = stage1.dataset.fullSrcset;
-    if (!showcaseWrapper || !fullSrcset) return;
+    const stage1Src = stage1.dataset.stage1Src;
+    if (!showcaseWrapper || !fullSrcset || !stage1Src) return;
 
     function upgradeShowcaseToFullRes() {
       const stage2 = document.createElement('img');
@@ -159,12 +171,35 @@ Ieder groepslid heeft zo een eigen verhaallijn en muzieknummer gekregen. Door de
       showcaseWrapper.appendChild(stage2);
     }
 
-    if (stage1.complete) {
-      upgradeShowcaseToFullRes();
-    } else {
+    function startLoad() {
       stage1.addEventListener('load', upgradeShowcaseToFullRes, { once: true });
+      stage1.src = stage1Src;
+    }
+
+    if (stage1.offsetParent !== null) {
+      startLoad();
+    } else {
+      deferredLoads.push({ stage1, startLoad });
     }
   });
+
+  // Covers resizing/rotating across the 768px breakpoint after the page
+  // already loaded — without this, whichever instance was hidden at load
+  // time would stay a permanently blank box if it later became visible.
+  if (deferredLoads.length) {
+    const recheckDeferred = () => {
+      for (let i = deferredLoads.length - 1; i >= 0; i--) {
+        if (deferredLoads[i].stage1.offsetParent !== null) {
+          deferredLoads[i].startLoad();
+          deferredLoads.splice(i, 1);
+        }
+      }
+      if (deferredLoads.length === 0) {
+        window.removeEventListener('resize', recheckDeferred);
+      }
+    };
+    window.addEventListener('resize', recheckDeferred);
+  }
 </script>
 
 <script define:vars={{

@@ -26,17 +26,33 @@ function ArrowIcon({ disabled }) {
 	);
 }
 
-function SpreadImage({ spread, priority }) {
+function SpreadImage({ spread, deferInitialLoad }) {
 	const [stage1Loaded, setStage1Loaded] = useState(false);
 	const [stage2Loaded, setStage2Loaded] = useState(false);
 	const stage1Ref = useRef(null);
 
-	// A browser-cached image can finish loading (and fire its native `load`
-	// event) before React hydrates and attaches the onLoad handler below —
-	// this catches that case on mount instead of waiting for an event that
-	// already happened.
 	useEffect(() => {
-		if (stage1Ref.current?.complete) {
+		const img = stage1Ref.current;
+		if (!img) return;
+		// `loading="lazy"` does NOT stop a browser from fetching an image
+		// sitting inside a `display:none` ancestor — turns out there's no
+		// viewport distance to defer against, so it just fetches immediately
+		// regardless. That's exactly the desktop/mobile MagazineViewer split:
+		// both instances' initial spread render server-side at once, and
+		// without this, the hidden one's image was being downloaded for
+		// nothing on every single visit. Omitting `src` from the SSR'd markup
+		// entirely (see below) and only assigning it here, from a `useEffect`,
+		// fixes it — the hidden instance's React never hydrates at all (that's
+		// what `client:media` gates), so this effect simply never runs there,
+		// and no fetch ever happens for it.
+		if (deferInitialLoad) {
+			img.src = spread.stage1Src;
+		}
+		// A browser-cached image can finish loading (and fire its native
+		// `load` event) before React hydrates and attaches the onLoad handler
+		// below — this catches that case on mount instead of waiting for an
+		// event that already happened.
+		if (img.complete) {
 			setStage1Loaded(true);
 		}
 	}, []);
@@ -46,12 +62,12 @@ function SpreadImage({ spread, priority }) {
 			<div className={`${styles["spread-photo"]} ${styles[`spread-photo--${spread.orientation}`]}`}>
 				<img
 					ref={stage1Ref}
-					src={spread.stage1Src}
+					src={deferInitialLoad ? undefined : spread.stage1Src}
 					width={spread.stage1Width}
 					height={spread.stage1Height}
 					alt={spread.caption}
 					className={styles["spread-image"]}
-					loading={priority ? "eager" : "lazy"}
+					loading="lazy"
 					onLoad={() => setStage1Loaded(true)}
 				/>
 				{stage1Loaded && (
@@ -97,7 +113,7 @@ export default function MagazineViewer({ spreads, framePaddingTopPercent, initia
 				className={`${styles["spread-frame"]} ${styles[`spread-frame--${current.orientation}`]}`}
 				style={{ paddingTop: `${framePaddingTopPercent}%` }}
 			>
-				<SpreadImage key={current.id} spread={current} priority={currentIndex === initialIndex} />
+				<SpreadImage key={current.id} spread={current} deferInitialLoad={currentIndex === initialIndex} />
 			</div>
 
 			{/* DE NAVIGATIE */}
