@@ -21,7 +21,7 @@ function withSourceTracking(url) {
 	return `${url}${separator}utm_source=jordideleeuw&utm_medium=portfolio`;
 }
 
-export default function SplitLayout({ leftContent, title, description, tools, liveUrl, liveLabel, liveButtonText }) {
+export default function SplitLayout({ leftContent, title, description, tools, liveUrl, liveNoteBefore, liveLinkText, liveNoteAfter }) {
 	// Dit houdt bij of de "Read More" info open (true) of dicht (false) is
 	const [isOpen, setIsOpen] = useState(false);
 
@@ -63,13 +63,19 @@ export default function SplitLayout({ leftContent, title, description, tools, li
 
 								{/* Optioneel: alleen renderen als er een liveUrl is meegegeven —
 								    zit in about-block zodat het onder de about-tekst zelf staat,
-								    even breed als die kolom, niet de volle breedte. */}
+								    even breed als die kolom, niet de volle breedte. Plain
+								    lopende tekst met alleen de naam als link — geen aparte
+								    "bezoek de website"-knop meer, want die site staat (nog)
+								    niet online; dit is puur de bronvermelding. */}
 								{liveUrl && (
 									<div className={styles["visit-block"]}>
-										<h3>{liveLabel || "Bekijk het project"}</h3>
-										<a href={withSourceTracking(liveUrl)} target="_blank" rel="noopener" className={styles["visit-button"]}>
-											{liveButtonText || "BEZOEK"}
-										</a>
+										<p className={styles["visit-note"]}>
+											{liveNoteBefore}
+											<a href={withSourceTracking(liveUrl)} target="_blank" rel="noopener" className={styles["visit-link"]}>
+												{liveLinkText}
+											</a>
+											{liveNoteAfter}
+										</p>
 									</div>
 								)}
 							</div>

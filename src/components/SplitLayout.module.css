@@ -290,24 +290,22 @@
 	margin-top: 1.5rem;
 }
 
-.visit-button {
-	display: inline-block;
-	text-align: center;
-	background-color: #000000;
-	border: 2px solid #000000;
-	color: #ffffff;
+.visit-note {
 	font-family: var(--font-base);
-	font-weight: 600;
-	font-size: 1.05rem;
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	text-decoration: none;
-	padding: 0.9rem 2rem;
-	transition:
-		background-color 0.2s ease,
-		color 0.2s ease;
+	font-weight: 400;
+	font-size: 1rem;
+	line-height: 1.5;
+	text-transform: none;
+	color: #000000;
 }
 
-.visit-button:hover {
-	background-color: #333333;
+.visit-link {
+	color: #000000;
+	font-weight: 700;
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+}
+
+.visit-link:hover {
+	color: #555555;
 }
