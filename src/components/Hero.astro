@@ -15,7 +15,12 @@ import styles from './Hero.module.css';
 
     <!-- 2. CONTACT RECHTSBOVEN (Kolom 11 en 12 desktop, kolom 4 mobiel) -->
     <div class={styles['hero-top-right']}>
-      <a href="mailto:deleeuwjordi@gmail.com" class={styles['btn-contact']} aria-label="Email">
+      <a
+        href="mailto:deleeuwjordi@gmail.com"
+        class={styles['btn-contact']}
+        aria-label="Email"
+        data-copy-email="deleeuwjordi@gmail.com"
+      >
         {/* CSS swaps which one shows, same max-width:768px breakpoint as
             everywhere else — text on desktop, mail icon on mobile (that
             corner cell is only 1 of 4 columns there, no room for text). */}
@@ -47,3 +52,25 @@ import styles from './Hero.module.css';
 
   </div>
 </section>
+
+<script>
+  const btn = document.querySelector<HTMLAnchorElement>('[data-copy-email]');
+  const label = btn?.querySelector('span');
+
+  btn?.addEventListener('click', async () => {
+    const email = btn.dataset.copyEmail;
+    if (!email) return;
+
+    try {
+      await navigator.clipboard.writeText(email);
+    } catch {
+      return; // clipboard unavailable: mailto still does its thing
+    }
+
+    if (label) {
+      const original = label.textContent;
+      label.textContent = 'E-MAIL GEKOPIEERD ✓';
+      setTimeout(() => (label.textContent = original), 2000);
+    }
+  });
+</script>
